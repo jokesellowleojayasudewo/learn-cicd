@@ -132,8 +132,9 @@
             const tbody = document.getElementById('financeTableBody');
             tbody.innerHTML = ''; 
 
-            // Memproses log histori keuangan terbalik (Data terbaru muncul di atas)
-            financeLogs.slice().reverse().forEach(log => {
+            // Memproses log histori keuangan terbalik (Menggunakan penggabungan string standar, tanpa backtick)
+            for (let i = financeLogs.length - 1; i >= 0; i--) {
+                let log = financeLogs[i];
                 let badgeClass = log.type === 'Pemasukan' ? 'badge-income' : 'badge-expense';
                 let textClass = log.type === 'Pemasukan' ? 'text-income' : 'text-expense';
                 let prefix = log.type === 'Pemasukan' ? '+ Rp ' : '- Rp ';
@@ -141,13 +142,13 @@
                 if(log.type === 'Pemasukan') totalIncome += log.amount;
                 if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
-                const row = '<tr>
-                    <td style="font-weight:600;">\${log.name}</td>
-                    <td><span class="badge \${badgeClass}">\${log.type}</span></td>
-                    <td class="\${textClass}">\${prefix}\${log.amount.toLocaleString('id-ID')}</td>
-                </tr>';
+                let row = '<tr>' +
+                    '<td style="font-weight:600;">' + log.name + '</td>' +
+                    '<td><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
+                    '<td class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
+                '</tr>';
                 tbody.innerHTML += row;
-            });
+            }
 
             const currentBalance = totalIncome - totalExpense;
 
