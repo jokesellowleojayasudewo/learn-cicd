@@ -36,6 +36,8 @@
         .badge-expense { background: #e74c3c; }
         .text-income { color: #2ecc71; font-weight: bold; }
         .text-expense { color: #e74c3c; font-weight: bold; }
+        .btn-delete { background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .btn-delete:hover { background: #c0392b; }
     </style>
 </head>
 <body>
@@ -109,6 +111,7 @@
                                     <th>Keterangan / Item</th>
                                     <th>Jenis</th>
                                     <th>Nominal</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="financeTableBody">
@@ -131,6 +134,11 @@
             const tbody = document.getElementById('financeTableBody');
             tbody.innerHTML = ''; 
 
+            // Simpan indeks asli karena kita akan membalik urutan tampilan
+            financeLogs.forEach((log, index) => {
+                log.originalIndex = index;
+            });
+
             financeLogs.slice().reverse().forEach(log => {
                 let badgeClass = log.type === 'Pemasukan' ? 'badge-income' : 'badge-expense';
                 let textClass = log.type === 'Pemasukan' ? 'text-income' : 'text-expense';
@@ -143,6 +151,7 @@
                     '<td style="font-weight:600;">' + log.name + '</td>' +
                     '<td><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
+                    '<td><button class="btn-delete" onclick="deleteLog(' + log.originalIndex + ')">Hapus</button></td>' +
                 '</tr>';
                 tbody.innerHTML += row;
             });
@@ -159,6 +168,15 @@
             } else {
                 document.getElementById('walletAlert').style.display = 'none';
                 document.getElementById('sisaSaldoCard').style.background = '#2ecc71';
+            }
+        }
+
+        // Fungsi khusus untuk menghapus data berdasarkan indeksnya
+        function deleteLog(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus data transaksi ini?')) {
+                financeLogs.splice(index, 1);
+                localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+                refreshDashboard();
             }
         }
 
