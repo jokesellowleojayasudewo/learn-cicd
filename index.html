@@ -39,6 +39,16 @@
         .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .btn-edit { background: #f39c12; margin-right: 5px; }
         .btn-delete { background: #e74c3c; }
+
+        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
+        .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-close { background: #7f8c8d; }
+        .btn-close:hover { background: #95a5a6; }
+        .btn-save-popup { background: #2980b9; }
+        .btn-save-popup:hover { background: #3498db; }
+        @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -66,7 +76,7 @@
         </div>
 
         <div class="row">
-            <!-- Panel Input (Kiri) -->
+            <!-- Panel Input Baru (Kiri) -->
             <div class="col-md-4">
                 <!-- Form Pemasukan -->
                 <div class="card" style="border-top: 4px solid #2ecc71;">
@@ -80,7 +90,7 @@
                             <label>Jumlah Pemasukan (Rp)</label>
                             <input type="text" id="incAmount" class="form-control" placeholder="Contoh: 500.000" required>
                         </div>
-                        <button type="submit" id="incBtn" class="btn btn-income">Tambah ke Saldo</button>
+                        <button type="submit" class="btn btn-income">Tambah ke Saldo</button>
                     </form>
                 </div>
 
@@ -96,7 +106,7 @@
                             <label>Jumlah Pengeluaran (Rp)</label>
                             <input type="text" id="expAmount" class="form-control" placeholder="Contoh: 35.000" required>
                         </div>
-                        <button type="submit" id="expBtn" class="btn btn-expense">Kurangi Saldo</button>
+                        <button type="submit" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
                 </div>
             </div>
@@ -125,10 +135,31 @@
         </div>
     </div>
 
+    <!-- STRUKTUR POP-UP INTERAKTIF KECIL (MODAL DIALOG) -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="margin-top:0; color:#2c3e50; border-bottom:2px solid #ecf0f1; padding-bottom:8px;">✏️ Edit Transaksi</h3>
+            <form id="popupEditForm">
+                <div class="form-group">
+                    <label>Keterangan / Nama Item</label>
+                    <input type="text" id="popName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Nominal Rupiah (Rp)</label>
+                    <input type="text" id="popAmount" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal()" class="btn btn-close">Batal</button>
+                    <button type="submit" class="btn btn-save-popup">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Jalur Logika Sistem Finansial -->
     <script>
         let financeLogs = JSON.parse(localStorage.getItem('itInfraWalletLogs')) || [];
-        let editIndex = null;
+        let activeEditIndex = null;
 
         function refreshDashboard() {
             let totalIncome = 0;
@@ -150,7 +181,7 @@
                     '<td><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
                     '<td>' +
-                        '<button onclick="triggerEdit(' + i + ')" class="btn-action btn-edit">Edit</button>' +
+                        '<button onclick="openEditModal(' + i + ')" class="btn-action btn-edit">Edit</button>' +
                         '<button onclick="deleteLog(' + i + ')" class="btn-action btn-delete">Hapus</button>' +
                     '</td>' +
                 '</tr>';
@@ -187,6 +218,7 @@
 
         document.getElementById('incAmount').addEventListener('input', formatInputRupiah);
         document.getElementById('expAmount').addEventListener('input', formatInputRupiah);
+        document.getElementById('popAmount').addEventListener('input', formatInputRupiah);
 
         document.getElementById('incomeForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -194,13 +226,7 @@
             const amount = cleanRupiahValue(document.getElementById('incAmount').value);
             
             if (amount > 0) {
-                if (editIndex !== null && financeLogs[editIndex].type === 'Pemasukan') {
-                    financeLogs[editIndex] = { name, amount, type: 'Pemasukan' };
-                    editIndex = null;
-                    document.getElementById('incBtn').innerText = 'Tambah ke Saldo';
-                } else {
-                    financeLogs.push({ name, amount, type: 'Pemasukan' });
-                }
+                financeLogs.push({ name, amount, type: 'Pemasukan' });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('incomeForm').reset();
@@ -213,46 +239,50 @@
             const amount = cleanRupiahValue(document.getElementById('expAmount').value);
             
             if (amount > 0) {
-                if (editIndex !== null && financeLogs[editIndex].type === 'Pengeluaran') {
-                    financeLogs[editIndex] = { name, amount, type: 'Pengeluaran' };
-                    editIndex = null;
-                    document.getElementById('expBtn').innerText = 'Kurangi Saldo';
-                } else {
-                    financeLogs.push({ name, amount, type: 'Pengeluaran' });
-                }
+                financeLogs.push({ name, amount, type: 'Pengeluaran' });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('expenseForm').reset();
             }
         });
 
-        function triggerEdit(index) {
+        function openEditModal(index) {
             const log = financeLogs[index];
-            editIndex = index;
+            activeEditIndex = index;
 
-            if (log.type === 'Pemasukan') {
-                document.getElementById('incName').value = log.name;
-                document.getElementById('incAmount').value = log.amount.toLocaleString('id-ID');
-                document.getElementById('incBtn').innerText = 'Simpan Perubahan';
-            } else {
-                document.getElementById('expName').value = log.name;
-                document.getElementById('expAmount').value = log.amount.toLocaleString('id-ID');
-                document.getElementById('expBtn').innerText = 'Simpan Perubahan';
-            }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('modalTitle').innerText = log.type === 'Pemasukan' ? '✏️ Edit Log Pemasukan' : '✏️ Edit Log Pengeluaran';
+            document.getElementById('popName').value = log.name;
+            document.getElementById('popAmount').value = log.amount.toLocaleString('id-ID');
+            
+            document.getElementById('editModal').style.display = 'flex';
         }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+            activeEditIndex = null;
+        }
+
+        document.getElementById('popupEditForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (activeEditIndex !== null) {
+                const name = document.getElementById('popName').value;
+                const amount = cleanRupiahValue(document.getElementById('popAmount').value);
+                const originalType = financeLogs[activeEditIndex].type;
+
+                if (amount > 0) {
+                    financeLogs[activeEditIndex] = { name, amount, type: originalType };
+                    localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+                    
+                    refreshDashboard();
+                    closeModal();
+                }
+            }
+        });
 
         function deleteLog(index) {
             if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
                 financeLogs.splice(index, 1);
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
-                if (editIndex === index) {
-                    editIndex = null;
-                    document.getElementById('incBtn').innerText = 'Tambah ke Saldo';
-                    document.getElementById('expBtn').innerText = 'Kurangi Saldo';
-                    document.getElementById('incomeForm').reset();
-                    document.getElementById('expenseForm').reset();
-                }
                 refreshDashboard();
             }
         }
