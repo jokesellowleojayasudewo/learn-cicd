@@ -198,7 +198,7 @@
         function formatInputRupiah(e) {
             let value = e.target.value.replace(/[^0-9]/g, ''); // Hapus semua karakter non-angka
             if (value) {
-                e.target.value = parseInt(value, 10).toLocaleString('id-ID');
+                e.target.value = parseInt(value, 1000).toLocaleString('id-ID');
             } else {
                 e.target.value = '';
             }
