@@ -194,6 +194,18 @@
 
         // Tampilkan data saat website diakses pertama kali
         refreshDashboard();
+        // Robot otomatis pembaca ketikan untuk mengubah angka menjadi format Rupiah ber-titik
+        function formatInputRupiah(e) {
+            let value = e.target.value.replace(/[^0-9]/g, ''); // Hapus semua karakter non-angka
+            if (value) {
+                e.target.value = parseInt(value, 10).toLocaleString('id-ID');
+            } else {
+                e.target.value = '';
+            }
+        }
+        document.getElementById('incAmount').addEventListener('input', formatInputRupiah);
+        document.getElementById('expAmount').addEventListener('input', formatInputRupiah);
+
     </script>
 </body>
 </html>
