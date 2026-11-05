@@ -1,3 +1,122 @@
-<h1>Dashboard IT Infrastruktur</h1>
-<p>Status Server Utama: AMAN (100% Online)</p>
-<p>Terakhir diperiksa oleh robot CI/CD secara otomatis.</p>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard IT Infrastruktur</title>
+    <!-- Menggunakan Bootstrap 5 untuk desain profesional -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <link href="https://jsdelivr.net" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">🌐 NOC COMMAND CENTER</a>
+            <span class="navbar-text text-success fw-bold">● LIVE MONITORING</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="fw-bold text-secondary">Dashboard Status Infrastruktur IT</h2>
+                <p class="text-muted">Diperbarui secara otomatis oleh sistem robot CI/CD & DevOps.</p>
+            </div>
+        </div>
+
+        <!-- Row 1: Status Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-success text-white">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase opacity-75">Server Utama</h6>
+                        <h3 class="fw-bold">100% Online</h3>
+                        <small>Uptime: 45 Hari tanpa kendala</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-info text-white">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase opacity-75">Koneksi Jaringan</h6>
+                        <h3 class="fw-bold">Aman</h3>
+                        <small>Ping Latency: 12ms</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-warning text-dark">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase opacity-75">Penggunaan RAM</h6>
+                        <h3 class="fw-bold">42% Terpakai</h3>
+                        <small>Sisa kapasitas: 8.5 GB</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-danger text-white">
+                    <div class="card-body">
+                        <h6 class="card-title text-uppercase opacity-75">Insiden Keamanan</h6>
+                        <h3 class="fw-bold">0 Ancaman</h3>
+                        <small>Firewall aktif penuh</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Tabel Inventaris Server -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white fw-bold text-dark py-3">
+                📋 Daftar Inventaris Server Virtual (Staging & Produksi)
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nama Server</th>
+                                <th>IP Address</th>
+                                <th>Sistem Operasi</th>
+                                <th>Fungsi</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold">srv-web-prod-01</td>
+                                <td><code>10.240.0.4</code></td>
+                                <td>Ubuntu 22.04 LTS</td>
+                                <td>Hosting Aplikasi Utama</td>
+                                <td><span class="badge bg-success">Aktif</span></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">srv-db-prod-02</td>
+                                <td><code>10.240.0.5</code></td>
+                                <td>PostgreSQL Cluster</td>
+                                <td>Database Pusat</td>
+                                <td><span class="badge bg-success">Aktif</span></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">srv-web-staging</td>
+                                <td><code>192.168.1.50</code></td>
+                                <td>Ubuntu 20.04 LTS</td>
+                                <td>Lingkungan Uji Coba (QA)</td>
+                                <td><span class="badge bg-secondary">Standby</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-muted my-5">
+            <small>&copy; 2026 Tim IT Infrastruktur & DevOps. Dibuat dengan Pipeline Otomatis GitHub Actions.</small>
+        </footer>
+    </div>
+
+</body>
+</html>
