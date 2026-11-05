@@ -75,7 +75,7 @@
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pemasukan (Rp)</label>
-                            <input type="number" id="incAmount" class="form-control" placeholder="Contoh: 500000" required>
+                            <input type="text" id="incAmount" class="form-control" placeholder="Contoh: 500.000" required>
                         </div>
                         <button type="submit" class="btn btn-income">Tambah ke Saldo</button>
                     </form>
@@ -91,7 +91,7 @@
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pengeluaran (Rp)</label>
-                            <input type="number" id="expAmount" class="form-control" placeholder="Contoh: 35000" required>
+                            <input type="text" id="expAmount" class="form-control" placeholder="Contoh: 35.000" required>
                         </div>
                         <button type="submit" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
@@ -123,7 +123,6 @@
 
     <!-- Jalur Logika Sistem Finansial -->
     <script>
-        // Mengambil data terenkripsi lokal dari database browser asli
         let financeLogs = JSON.parse(localStorage.getItem('itInfraWalletLogs')) || [];
 
         function refreshDashboard() {
@@ -132,9 +131,7 @@
             const tbody = document.getElementById('financeTableBody');
             tbody.innerHTML = ''; 
 
-            // Memproses log histori keuangan terbalik (Menggunakan penggabungan string standar, tanpa backtick)
-            for (let i = financeLogs.length - 1; i >= 0; i--) {
-                let log = financeLogs[i];
+            financeLogs.slice().reverse().forEach(log => {
                 let badgeClass = log.type === 'Pemasukan' ? 'badge-income' : 'badge-expense';
                 let textClass = log.type === 'Pemasukan' ? 'text-income' : 'text-expense';
                 let prefix = log.type === 'Pemasukan' ? '+ Rp ' : '- Rp ';
@@ -142,13 +139,13 @@
                 if(log.type === 'Pemasukan') totalIncome += log.amount;
                 if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
-                let row = '<tr>' +
+                const row = '<tr>' +
                     '<td style="font-weight:600;">' + log.name + '</td>' +
                     '<td><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
                 '</tr>';
                 tbody.innerHTML += row;
-            }
+            });
 
             const currentBalance = totalIncome - totalExpense;
 
@@ -156,7 +153,6 @@
             document.getElementById('totalExpenseTxt').innerText = 'Rp ' + totalExpense.toLocaleString('id-ID');
             document.getElementById('sisaSaldoTxt').innerText = 'Rp ' + currentBalance.toLocaleString('id-ID');
 
-            // Kontrol Otomatis Infrastruktur Keamanan Saldo
             if (currentBalance < 0) {
                 document.getElementById('walletAlert').style.display = 'block';
                 document.getElementById('sisaSaldoCard').style.background = '#e74c3c';
@@ -166,46 +162,51 @@
             }
         }
 
-        // Event Handler 1: Eksekusi Pemasukan
-        document.getElementById('incomeForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('incName').value;
-            const amount = parseInt(document.getElementById('incAmount').value);
-            
-            financeLogs.push({ name, amount, type: 'Pemasukan' });
-            localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
-            
-            refreshDashboard();
-            document.getElementById('incomeForm').reset();
-        });
+        function cleanRupiahValue(str) {
+            return parseInt(str.replace(/[^0-9]/g, ''), 10) || 0;
+        }
 
-        // Event Handler 2: Eksekusi Pengeluaran
-        document.getElementById('expenseForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('expName').value;
-            const amount = parseInt(document.getElementById('expAmount').value);
-            
-            financeLogs.push({ name, amount, type: 'Pengeluaran' });
-            localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
-            
-            refreshDashboard();
-            document.getElementById('expenseForm').reset();
-        });
-
-        // Tampilkan data saat website diakses pertama kali
-        refreshDashboard();
-        // Robot otomatis pembaca ketikan untuk mengubah angka menjadi format Rupiah ber-titik
         function formatInputRupiah(e) {
-            let value = e.target.value.replace(/[^0-9]/g, ''); // Hapus semua karakter non-angka
+            let value = e.target.value.replace(/[^0-9]/g, ''); 
             if (value) {
-                e.target.value = parseInt(value, 1000).toLocaleString('id-ID');
+                e.target.value = parseInt(value, 10).toLocaleString('id-ID');
             } else {
                 e.target.value = '';
             }
         }
+
         document.getElementById('incAmount').addEventListener('input', formatInputRupiah);
         document.getElementById('expAmount').addEventListener('input', formatInputRupiah);
 
+        document.getElementById('incomeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('incName').value;
+            const rawAmount = document.getElementById('incAmount').value;
+            const amount = cleanRupiahValue(rawAmount);
+            
+            if (amount > 0) {
+                financeLogs.push({ name, amount, type: 'Pemasukan' });
+                localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+                refreshDashboard();
+                document.getElementById('incomeForm').reset();
+            }
+        });
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('expName').value;
+            const rawAmount = document.getElementById('expAmount').value;
+            const amount = cleanRupiahValue(rawAmount);
+            
+            if (amount > 0) {
+                financeLogs.push({ name, amount, type: 'Pengeluaran' });
+                localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+                refreshDashboard();
+                document.getElementById('expenseForm').reset();
+            }
+        });
+
+        refreshDashboard();
     </script>
 </body>
 </html>
