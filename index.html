@@ -28,8 +28,6 @@
         .btn-income:hover { background: #27ae60; }
         .btn-expense { background: #e74c3c; }
         .btn-expense:hover { background: #c0392b; }
-        
-        /* GAYA TABEL STANDAR DESKTOP (Persis seperti semula) */
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
         td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
@@ -38,11 +36,10 @@
         .badge-expense { background: #e74c3c; }
         .text-income { color: #2ecc71; font-weight: bold; }
         .text-expense { color: #e74c3c; font-weight: bold; }
-        .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-action { color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .btn-edit { background: #f39c12; margin-right: 5px; }
         .btn-delete { background: #e74c3c; }
 
-        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
         .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
@@ -52,7 +49,7 @@
         .btn-save-popup:hover { background: #3498db; }
         @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* KUNCI KHUSUS TAMPILAN HP (Lebar layar maksimal 768 piksel) */
+        /* Kunci Khusus Layar HP (Lebar layar maksimal 768 piksel) */
         @media screen and (max-width: 768px) {
             #kasTable, #kasTable thead, #kasTable tbody, #kasTable th, #kasTable td, #kasTable tr { 
                 display: block; 
@@ -63,13 +60,14 @@
             #kasTable tr { 
                 border: 1px solid #e2e8f0; 
                 border-radius: 8px; 
-                padding: 10px; 
+                padding: 12px; 
                 margin-bottom: 12px; 
                 background: #f8fafc; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
             #kasTable td { 
                 text-align: right; 
-                padding: 8px 5px; 
+                padding: 10px 5px; 
                 border-bottom: 1px dashed #edf2f7; 
                 display: flex; 
                 justify-content: space-between; 
@@ -82,9 +80,12 @@
             }
             #kasTable td:last-child { 
                 border-bottom: none; 
-                justify-content: flex-end;
+                padding-bottom: 5px;
             }
-            .btn-action { padding: 6px 12px; font-size: 0.85rem; }
+            .action-buttons-container {
+                display: flex;
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -209,8 +210,10 @@
                     '<td data-label="Jenis"><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td data-label="Nominal" class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
                     '<td data-label="Aksi">' +
-                        '<button onclick="openEditModal(' + i + ')" class="btn-action btn-edit">Edit</button>' +
-                        '<button onclick="deleteLog(' + i + ')" class="btn-action btn-delete">Hapus</button>' +
+                        '<div class="action-buttons-container">' +
+                            '<button onclick="openEditModal(' + i + ')" class="btn-action btn-edit">Edit</button>' +
+                            '<button onclick="deleteLog(' + i + ')" class="btn-action btn-delete">Hapus</button>' +
+                        '</div>' +
                     '</td>' +
                 '</tr>';
                 tbody.innerHTML += row;
@@ -281,7 +284,6 @@
             document.getElementById('modalTitle').innerText = log.type === 'Pemasukan' ? '✏️ Edit Log Pemasukan' : '✏️ Edit Log Pengeluaran';
             document.getElementById('popName').value = log.name;
             document.getElementById('popAmount').value = log.amount.toLocaleString('id-ID');
-            
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -300,7 +302,6 @@
                 if (amount > 0) {
                     financeLogs[activeEditIndex] = { name, amount, type: originalType };
                     localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
-                    
                     refreshDashboard();
                     closeModal();
                 }
