@@ -2,75 +2,89 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Wallet Control Center - IT Infra</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
-        .navbar { background: #2c3e50; color: white; padding: 15px 20px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; box-sizing: border-box; }
+        .navbar { background: #2c3e50; color: white; padding: 15px 20px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
         .row { display: flex; gap: 20px; flex-wrap: wrap; }
-        .col-md-4 { flex: 1; min-width: 300px; }
-        .col-md-8 { flex: 2; min-width: 300px; width: 100%; }
-        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; box-sizing: border-box; }
+        .col-md-4 { flex: 1; min-width: 320px; }
+        .col-md-8 { flex: 2; min-width: 350px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .card-title { font-size: 1.1rem; font-weight: bold; margin-top: 0; margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 8px; }
         .summary-box { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .summary-card { flex: 1; min-width: 250px; padding: 15px; border-radius: 6px; color: white; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .summary-card { flex: 1; min-width: 180px; padding: 15px; border-radius: 6px; color: white; text-align: center; }
         .bg-blue { background: #3498db; }
         .bg-red { background: #e74c3c; }
         .bg-green { background: #2ecc71; }
         .summary-value { font-size: 1.4rem; font-weight: bold; margin: 5px 0 0 0; }
-        .alert-box { background: #fdf2e2; border-left: 5px solid #e74c3c; padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; color: #c0392b; font-weight: bold; font-size: 0.9rem; }
+        .alert-box { background: #fdf2e2; border-left: 5px solid #e74c3c; padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; color: #c0392b; font-weight: bold; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; }
-        
-        /* TABLE RESPONSIVE UNTUK HP - MENGGUNAKAN BLOK CARD */
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
-        .badge { color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
-        .badge-income { background: #2ecc71; }
-        .badge-expense { background: #e74c3c; }
-        .text-income { color: #2ecc71; font-weight: bold; }
-        .text-expense { color: #e74c3c; font-weight: bold; }
-        
-        .btn { color: white; border: none; padding: 12px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 0.95rem; font-weight: bold; transition: 0.2s; margin-top: 5px; }
+        .form-control { width: 100%; padding: 8px 10px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; }
+        .btn { color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 0.95rem; font-weight: bold; transition: 0.2s; margin-top: 5px; }
         .btn-income { background: #2ecc71; }
         .btn-income:hover { background: #27ae60; }
         .btn-expense { background: #e74c3c; }
         .btn-expense:hover { background: #c0392b; }
-        .btn-action { color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        
+        /* GAYA TABEL STANDAR DESKTOP (Persis seperti semula) */
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
+        .badge { color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-income { background: #2ecc71; }
+        .badge-expense { background: #e74c3c; }
+        .text-income { color: #2ecc71; font-weight: bold; }
+        .text-expense { color: #e74c3c; font-weight: bold; }
+        .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .btn-edit { background: #f39c12; margin-right: 5px; }
         .btn-delete { background: #e74c3c; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); box-sizing: border-box; }
+        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
         .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
         .btn-close { background: #7f8c8d; }
         .btn-close:hover { background: #95a5a6; }
         .btn-save-popup { background: #2980b9; }
         .btn-save-popup:hover { background: #3498db; }
+        @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* RESPONSIVE BREAKPOINT KHUSUS HP (SCREEN < 768px) */
+        /* KUNCI KHUSUS TAMPILAN HP (Lebar layar maksimal 768 piksel) */
         @media screen and (max-width: 768px) {
-            .navbar { font-size: 1rem; padding: 12px 10px; }
-            .container { margin: 10px auto; padding: 0 10px; }
-            .col-md-4, .col-md-8 { min-width: 100%; }
-            .card { padding: 15px; margin-bottom: 15px; }
-            .summary-card { min-width: 100%; padding: 12px; }
-            .summary-value { font-size: 1.25rem; }
-            
-            /* SAKTI: Mengubah struktur tabel menjadi baris kartu vertikal agar tidak overflow */
-            table, thead, tbody, th, td, tr { display: block; }
-            thead { display: none; } /* Sembunyikan header tabel */
-            tr { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #f8fafc; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-            td { text-align: right; padding: 8px 0; border-bottom: 1px dashed #edf2f7; position: relative; display: flex; justify-content: space-between; align-items: center; }
-            td:last-child { border-bottom: none; padding-bottom: 0; margin-top: 5px; }
-            
-            /* Berikan label penanda kolom di sebelah kiri */
-            td::before { content: attr(data-label); font-weight: bold; color: #718096; font-size: 0.85rem; float: left; }
-            .btn-action { padding: 8px 16px; font-size: 0.9rem; flex: 1; text-align: center; }
-            td:last-child display { width: 100%; display: flex; gap: 10px; }
+            #kasTable, #kasTable thead, #kasTable tbody, #kasTable th, #kasTable td, #kasTable tr { 
+                display: block; 
+            }
+            #kasTable thead { 
+                display: none; 
+            }
+            #kasTable tr { 
+                border: 1px solid #e2e8f0; 
+                border-radius: 8px; 
+                padding: 10px; 
+                margin-bottom: 12px; 
+                background: #f8fafc; 
+            }
+            #kasTable td { 
+                text-align: right; 
+                padding: 8px 5px; 
+                border-bottom: 1px dashed #edf2f7; 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+            }
+            #kasTable td::before { 
+                content: attr(data-label); 
+                font-weight: bold; 
+                color: #718096; 
+            }
+            #kasTable td:last-child { 
+                border-bottom: none; 
+                justify-content: flex-end;
+            }
+            .btn-action { padding: 6px 12px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -132,8 +146,8 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-title">📋 Buku Kas Global (Arus Kas Masuk & Keluar)</div>
-                    <div style="width: 100%;">
-                        <table>
+                    <div style="overflow-x: auto;">
+                        <table id="kasTable">
                             <thead>
                                 <tr>
                                     <th>Keterangan / Item</th>
@@ -191,7 +205,7 @@
                 if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
                 const row = '<tr>' +
-                    '<td data-label="Item" style="font-weight:600;">' + log.name + '</td>' +
+                    '<td data-label="Keterangan / Item" style="font-weight:600;">' + log.name + '</td>' +
                     '<td data-label="Jenis"><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td data-label="Nominal" class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
                     '<td data-label="Aksi">' +
@@ -263,9 +277,11 @@
         function openEditModal(index) {
             const log = financeLogs[index];
             activeEditIndex = index;
+
             document.getElementById('modalTitle').innerText = log.type === 'Pemasukan' ? '✏️ Edit Log Pemasukan' : '✏️ Edit Log Pengeluaran';
             document.getElementById('popName').value = log.name;
             document.getElementById('popAmount').value = log.amount.toLocaleString('id-ID');
+            
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -284,6 +300,7 @@
                 if (amount > 0) {
                     financeLogs[activeEditIndex] = { name, amount, type: originalType };
                     localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+                    
                     refreshDashboard();
                     closeModal();
                 }
