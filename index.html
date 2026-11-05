@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Wallet Control Center - LEO</title>
+    <title>Dynamic Wallet Control Center - IT Infra</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
         .navbar { background: #2c3e50; color: white; padding: 15px 20px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -30,19 +30,20 @@
         .btn-expense:hover { background: #c0392b; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
-        .badge { color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; vertical-align: middle; }
+        .badge { color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
         .badge-income { background: #2ecc71; }
         .badge-expense { background: #e74c3c; }
         .text-income { color: #2ecc71; font-weight: bold; }
         .text-expense { color: #e74c3c; font-weight: bold; }
-        .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-action { color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
         .btn-edit { background: #f39c12; margin-right: 5px; }
+        .btn-edit:hover { background: #e67e22; }
         .btn-delete { background: #e74c3c; }
+        .btn-delete:hover { background: #c0392b; }
 
         .action-buttons-container { display: flex; gap: 5px; }
 
-        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
         .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
@@ -56,7 +57,6 @@
 
         @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* Kunci Khusus Layar HP (Lebar layar maksimal 768 piksel) */
         @media screen and (max-width: 768px) {
             #kasTable, #kasTable thead, #kasTable tbody, #kasTable th, #kasTable td, #kasTable tr { 
                 display: block; 
@@ -67,20 +67,37 @@
             #kasTable tr { 
                 border: 1px solid #e2e8f0; 
                 border-radius: 8px; 
-                padding: 10px; 
-                margin-bottom: 12px; 
+                padding: 15px; 
+                margin-bottom: 15px; 
                 background: #f8fafc; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
             #kasTable td { 
                 text-align: right; 
-                padding: 8px 5px; 
+                padding: 10px 0; 
                 border-bottom: 1px dashed #edf2f7; 
                 display: flex; 
                 justify-content: space-between; 
                 align-items: center; 
+                font-size: 0.95rem;
+            }
+            #kasTable td::before { 
+                content: attr(data-label); 
+                font-weight: bold; 
+                color: #718096; 
+            }
+            #kasTable td:first-child {
+                font-size: 1.1rem;
+                border-bottom: 2px solid #edf2f7;
+                padding-bottom: 8px;
+                margin-bottom: 5px;
+            }
+            #kasTable td:first-child::before {
+                content: "Keterangan";
             }
             #kasTable td:last-child { 
                 border-bottom: none; 
+                padding-top: 12px;
             }
             .action-buttons-container { justify-content: flex-end; width: 100%; }
         }
@@ -91,10 +108,8 @@
     <div class="navbar">💸 DYNAMIC WALLET CONTROL CENTER</div>
 
     <div class="container">
-        <!-- Peringatan Saldo Minus -->
         <div id="walletAlert" class="alert-box">⚠️ KRISIS KEUANGAN: Sisa saldo Anda minus! Pengeluaran melebihi anggaran tersedia.</div>
 
-        <!-- Ringkasan Finansial Dinamis -->
         <div class="summary-box">
             <div class="summary-card bg-blue">
                 <div>Total Pemasukan Masuk</div>
@@ -111,42 +126,38 @@
         </div>
 
         <div class="row">
-            <!-- Panel Input Baru (Kiri) -->
             <div class="col-md-4">
-                <!-- Form Pemasukan -->
                 <div class="card" style="border-top: 4px solid #2ecc71;">
                     <div class="card-title">💰 Tambah Pemasukan</div>
                     <form id="incomeForm">
                         <div class="form-group">
                             <label>Sumber / Keterangan</label>
-                            <input type="text" id="incName" class="form-control" placeholder="Masukan Sumber Dana. Contoh: Gaji" required>
+                            <input type="text" id="incName" class="form-control" placeholder="Masukan Sumber Pemasukan..." required>
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pemasukan (Rp)</label>
-                            <input type="text" id="incAmount" class="form-control" placeholder="Masukan Nominal" required>
+                            <input type="text" id="incAmount" class="form-control" placeholder="Masukan Nominal..." required>
                         </div>
                         <button type="submit" id="incBtn" class="btn btn-income">Tambah ke Saldo</button>
                     </form>
                 </div>
 
-                <!-- Form Pengeluaran -->
                 <div class="card" style="border-top: 4px solid #e74c3c;">
                     <div class="card-title">🛒 Tambah Pengeluaran</div>
                     <form id="expenseForm">
                         <div class="form-group">
                             <label>Nama Pengeluaran</label>
-                            <input type="text" id="expName" class="form-control" placeholder="Masukan Nama Pengeluaran. Contoh: Makan Siang" required>
+                            <input type="text" id="expName" class="form-control" placeholder="Masukan Nama Pengeluaran..." required>
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pengeluaran (Rp)</label>
-                            <input type="text" id="expAmount" class="form-control" placeholder="Masukan Nominal" required>
+                            <input type="text" id="expAmount" class="form-control" placeholder="Masukan Nominal..." required>
                         </div>
                         <button type="submit" id="expBtn" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
                 </div>
             </div>
 
-            <!-- Tabel Riwayat Keuangan (Kanan) -->
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-title">📋 Buku Kas Global (Arus Kas Masuk & Keluar)</div>
@@ -162,7 +173,6 @@
                                 </tr>
                             </thead>
                             <tbody id="financeTableBody">
-                                <!-- Data otomatis dimasukkan oleh logika skrip -->
                             </tbody>
                         </table>
                     </div>
@@ -171,7 +181,6 @@
         </div>
     </div>
 
-    <!-- STRUKTUR POP-UP INTERAKTIF KECIL UNTUK EDIT DATA -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="modalTitle" style="margin-top:0; color:#2c3e50; border-bottom:2px solid #ecf0f1; padding-bottom:8px;">✏️ Edit Transaksi</h3>
@@ -237,8 +246,8 @@
                 if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
                 const row = '<tr>' +
-                    '<td data-label="Keterangan / Item" style="font-weight:600;">' + log.name + '</td>' +
-                    '<td><div style="display:flex; justify-content:space-between; width:100%;" class="hp-row"><span>Jenis</span><span class="badge ' + badgeClass + '">' + log.type + '</span></div></td>' +
+                    '<td>' + log.name + '</td>' +
+                    '<td data-label="Jenis"><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td data-label="Nominal" class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
                     '<td data-label="Waktu" style="color:#7f8c8d; font-size:0.9rem;">' + (log.waktu || '-') + '</td>' +
                     '<td data-label="Aksi">' +
