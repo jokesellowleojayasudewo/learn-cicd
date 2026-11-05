@@ -36,10 +36,13 @@
         .badge-expense { background: #e74c3c; }
         .text-income { color: #2ecc71; font-weight: bold; }
         .text-expense { color: #e74c3c; font-weight: bold; }
-        .btn-action { color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .btn-edit { background: #f39c12; margin-right: 5px; }
         .btn-delete { background: #e74c3c; }
 
+        .action-buttons-container { display: flex; gap: 5px; }
+
+        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
         .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
@@ -47,6 +50,11 @@
         .btn-close:hover { background: #95a5a6; }
         .btn-save-popup { background: #2980b9; }
         .btn-save-popup:hover { background: #3498db; }
+        
+        /* WARNA TOMBOL KHUSUS MODAL HAPUS */
+        .btn-confirm-delete { background: #e74c3c; }
+        .btn-confirm-delete:hover { background: #c0392b; }
+
         @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* Kunci Khusus Layar HP (Lebar layar maksimal 768 piksel) */
@@ -60,14 +68,13 @@
             #kasTable tr { 
                 border: 1px solid #e2e8f0; 
                 border-radius: 8px; 
-                padding: 12px; 
+                padding: 10px; 
                 margin-bottom: 12px; 
                 background: #f8fafc; 
-                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
             #kasTable td { 
                 text-align: right; 
-                padding: 10px 5px; 
+                padding: 8px 5px; 
                 border-bottom: 1px dashed #edf2f7; 
                 display: flex; 
                 justify-content: space-between; 
@@ -80,12 +87,8 @@
             }
             #kasTable td:last-child { 
                 border-bottom: none; 
-                padding-bottom: 5px;
             }
-            .action-buttons-container {
-                display: flex;
-                gap: 5px;
-            }
+            .action-buttons-container { justify-content: flex-end; width: 100%; }
         }
     </style>
 </head>
@@ -94,8 +97,10 @@
     <div class="navbar">💸 DYNAMIC WALLET CONTROL CENTER</div>
 
     <div class="container">
+        <!-- Peringatan Saldo Minus -->
         <div id="walletAlert" class="alert-box">⚠️ KRISIS KEUANGAN: Sisa saldo Anda minus! Pengeluaran melebihi anggaran tersedia.</div>
 
+        <!-- Ringkasan Finansial Dinamis -->
         <div class="summary-box">
             <div class="summary-card bg-blue">
                 <div>Total Pemasukan Masuk</div>
@@ -112,7 +117,9 @@
         </div>
 
         <div class="row">
+            <!-- Panel Input Baru (Kiri) -->
             <div class="col-md-4">
+                <!-- Form Pemasukan -->
                 <div class="card" style="border-top: 4px solid #2ecc71;">
                     <div class="card-title">💰 Tambah Pemasukan</div>
                     <form id="incomeForm">
@@ -124,10 +131,11 @@
                             <label>Jumlah Pemasukan (Rp)</label>
                             <input type="text" id="incAmount" class="form-control" placeholder="Contoh: 500.000" required>
                         </div>
-                        <button type="submit" id="incBtn" class="btn btn-income">Tambah ke Saldo</button>
+                        <button type="submit" class="btn btn-income">Tambah ke Saldo</button>
                     </form>
                 </div>
 
+                <!-- Form Pengeluaran -->
                 <div class="card" style="border-top: 4px solid #e74c3c;">
                     <div class="card-title">🛒 Tambah Pengeluaran</div>
                     <form id="expenseForm">
@@ -139,11 +147,12 @@
                             <label>Jumlah Pengeluaran (Rp)</label>
                             <input type="text" id="expAmount" class="form-control" placeholder="Contoh: 35.000" required>
                         </div>
-                        <button type="submit" id="expBtn" class="btn btn-expense">Kurangi Saldo</button>
+                        <button type="submit" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
                 </div>
             </div>
 
+            <!-- Tabel Riwayat Keuangan (Kanan) -->
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-title">📋 Buku Kas Global (Arus Kas Masuk & Keluar)</div>
@@ -158,6 +167,7 @@
                                 </tr>
                             </thead>
                             <tbody id="financeTableBody">
+                                <!-- Data otomatis dimasukkan oleh logika skrip -->
                             </tbody>
                         </table>
                     </div>
@@ -166,6 +176,7 @@
         </div>
     </div>
 
+    <!-- STRUKTUR POP-UP INTERAKTIF KECIL UNTUK EDIT DATA -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="modalTitle" style="margin-top:0; color:#2c3e50; border-bottom:2px solid #ecf0f1; padding-bottom:8px;">✏️ Edit Transaksi</h3>
@@ -186,9 +197,22 @@
         </div>
     </div>
 
+    <!-- STRUKTUR POP-UP INTERAKTIF KECIL UNTUK KONFIRMASI HAPUS DATA KUSTOM -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content text-center" style="text-align: center;">
+            <h3 style="margin-top:0; color:#e74c3c;">⚠️ Konfirmasi Hapus</h3>
+            <p style="font-size: 0.95rem; color:#555; margin-bottom:20px;">Apakah Anda yakin ingin menghapus data transaksi ini? Tindakan ini tidak bisa dibatalkan.</p>
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" onclick="closeDeleteModal()" class="btn btn-close" style="width: auto; min-width: 80px;">Batal</button>
+                <button type="button" onclick="confirmDelete()" class="btn btn-confirm-delete" style="width: auto; min-width: 100px;">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let financeLogs = JSON.parse(localStorage.getItem('itInfraWalletLogs')) || [];
         let activeEditIndex = null;
+        let deleteTargetIndex = null;
 
         function refreshDashboard() {
             let totalIncome = 0;
@@ -207,7 +231,7 @@
 
                 const row = '<tr>' +
                     '<td data-label="Keterangan / Item" style="font-weight:600;">' + log.name + '</td>' +
-                    '<td data-label="Jenis"><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
+                    '<td><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td data-label="Nominal" class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
                     '<td data-label="Aksi">' +
                         '<div class="action-buttons-container">' +
@@ -251,6 +275,7 @@
         document.getElementById('expAmount').addEventListener('input', formatInputRupiah);
         document.getElementById('popAmount').addEventListener('input', formatInputRupiah);
 
+        // Input Pemasukan Normal
         document.getElementById('incomeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('incName').value;
@@ -264,6 +289,7 @@
             }
         });
 
+        // Input Pengeluaran Normal
         document.getElementById('expenseForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('expName').value;
@@ -277,6 +303,7 @@
             }
         });
 
+        // LOGIKA MEMBUKA POP-UP EDIT KECIL
         function openEditModal(index) {
             const log = financeLogs[index];
             activeEditIndex = index;
@@ -284,6 +311,7 @@
             document.getElementById('modalTitle').innerText = log.type === 'Pemasukan' ? '✏️ Edit Log Pemasukan' : '✏️ Edit Log Pengeluaran';
             document.getElementById('popName').value = log.name;
             document.getElementById('popAmount').value = log.amount.toLocaleString('id-ID');
+            
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -292,6 +320,7 @@
             activeEditIndex = null;
         }
 
+        // SIMPAN DATA DARI POP-UP EDIT KE DATABASE BROWSER
         document.getElementById('popupEditForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if (activeEditIndex !== null) {
@@ -302,17 +331,30 @@
                 if (amount > 0) {
                     financeLogs[activeEditIndex] = { name, amount, type: originalType };
                     localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+                    
                     refreshDashboard();
                     closeModal();
                 }
             }
         });
 
+        // LOGIKA POP-UP KONFIRMASI HAPUS KUSTOM
         function deleteLog(index) {
-            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                financeLogs.splice(index, 1);
+            deleteTargetIndex = index;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            deleteTargetIndex = null;
+        }
+
+        function confirmDelete() {
+            if (deleteTargetIndex !== null) {
+                financeLogs.splice(deleteTargetIndex, 1);
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
+                closeDeleteModal();
             }
         }
 
