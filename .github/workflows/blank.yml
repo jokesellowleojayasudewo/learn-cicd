@@ -1,22 +1,32 @@
-name: Audit Infrastruktur Otomatis
+name: Deploy Web Infrastruktur
 
 on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  audit-server:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: 1. Cek Koneksi dan Sistem Operasi Server
-        run: uname -a
+      - name: 1. Ambil File Website
+        uses: actions/checkout@v4
 
-      - name: 2. Periksa Total Kapasitas RAM Server
-        run: free -h
+      - name: 2. Konfigurasi Server Web
+        uses: actions/configure-pages@v5
 
-      - name: 3. Periksa Kapasitas Harddisk / Penyimpanan
-        run: df -h
+      - name: 3. Bungkus File Website
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-      - name: 4. Cek Alamat IP Jaringan Server Virtual
-        run: curl ifconfig.me
+      - name: 4. Deploy ke Server Internet (CD)
+        id: deployment
+        uses: actions/deploy-pages@v4
