@@ -3,100 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Tracker - Tim IT Infrastruktur</title>
+    <title>Dynamic Wallet Control Center - IT Infra</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
         .navbar { background: #2c3e50; color: white; padding: 15px 20px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
         .row { display: flex; gap: 20px; flex-wrap: wrap; }
-        .col-md-4 { flex: 1; min-width: 300px; }
-        .col-md-8 { flex: 2; min-width: 300px; }
+        .col-md-4 { flex: 1; min-width: 320px; }
+        .col-md-8 { flex: 2; min-width: 350px; }
         .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .card-title { font-size: 1.1rem; font-weight: bold; margin-top: 0; margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 8px; }
         .summary-box { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .summary-card { flex: 1; min-width: 140px; padding: 15px; border-radius: 6px; color: white; text-align: center; }
+        .summary-card { flex: 1; min-width: 180px; padding: 15px; border-radius: 6px; color: white; text-align: center; }
         .bg-blue { background: #3498db; }
         .bg-red { background: #e74c3c; }
         .bg-green { background: #2ecc71; }
         .summary-value { font-size: 1.4rem; font-weight: bold; margin: 5px 0 0 0; }
-        .alert-box { background: #fdf2e2; border-left: 5px solid #f39c12; padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; color: #d35400; font-weight: bold; }
-        .form-group { margin-bottom: 15px; }
+        .alert-box { background: #fdf2e2; border-left: 5px solid #e74c3c; padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; color: #c0392b; font-weight: bold; }
+        .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; }
-        .btn { background: #2ecc71; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1rem; font-weight: bold; transition: 0.2s; }
-        .btn:hover { background: #27ae60; }
+        .form-control { width: 100%; padding: 8px 10px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; }
+        .btn { color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 0.95rem; font-weight: bold; transition: 0.2s; margin-top: 5px; }
+        .btn-income { background: #2ecc71; }
+        .btn-income:hover { background: #27ae60; }
+        .btn-expense { background: #e74c3c; }
+        .btn-expense:hover { background: #c0392b; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
         td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
-        .badge { background: #e74c3c; color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.75rem; }
+        .badge { color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-income { background: #2ecc71; }
+        .badge-expense { background: #e74c3c; }
+        .text-income { color: #2ecc71; font-weight: bold; }
+        .text-expense { color: #e74c3c; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="navbar">💰 PERSONAL FINANCE CONTROL CENTER</div>
+    <div class="navbar">💸 DYNAMIC WALLET CONTROL CENTER</div>
 
     <div class="container">
-        <!-- Notifikasi Overbudget -->
-        <div id="budgetAlert" class="alert-box">⚠️ PERINGATAN: Pengeluaran Anda sudah melebihi batas anggaran bulanan!</div>
+        <!-- Peringatan Saldo Minus -->
+        <div id="walletAlert" class="alert-box">⚠️ KRISIS KEUANGAN: Sisa saldo Anda minus! Pengeluaran melebihi anggaran tersedia.</div>
 
-        <!-- Ringkasan Saldo -->
+        <!-- Ringkasan Finansial Dinamis -->
         <div class="summary-box">
             <div class="summary-card bg-blue">
-                <div>Anggaran Bulanan</div>
-                <div class="summary-value">Rp 5.000.000</div>
+                <div>Total Pemasukan Masuk</div>
+                <div id="totalIncomeTxt" class="summary-value">Rp 0</div>
             </div>
             <div class="summary-card bg-red">
                 <div>Total Pengeluaran</div>
-                <div id="totalExpenseTxt">Rp 0</div>
+                <div id="totalExpenseTxt" class="summary-value">Rp 0</div>
             </div>
             <div class="summary-card bg-green" id="sisaSaldoCard">
-                <div>Sisa Saldo</div>
-                <div id="sisaSaldoTxt">Rp 5.000.000</div>
+                <div>Sisa Saldo Saat Ini</div>
+                <div id="sisaSaldoTxt" class="summary-value">Rp 0</div>
             </div>
         </div>
 
         <div class="row">
-            <!-- Form Input (Kiri) -->
+            <!-- Panel Input (Kiri) -->
             <div class="col-md-4">
-                <div class="card">
-                    <div class="card-title">Tambah Pengeluaran</div>
+                <!-- Form Pemasukan -->
+                <div class="card" style="border-top: 4px solid #2ecc71;">
+                    <div class="card-title">💰 Tambah Pemasukan</div>
+                    <form id="incomeForm">
+                        <div class="form-group">
+                            <label>Sumber / Keterangan</label>
+                            <input type="text" id="incName" class="form-control" placeholder="Contoh: Gaji Magang, Uang Bulanan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Pemasukan (Rp)</label>
+                            <input type="number" id="incAmount" class="form-control" placeholder="Contoh: 500000" required>
+                        </div>
+                        <button type="submit" class="btn btn-income">Tambah ke Saldo</button>
+                    </form>
+                </div>
+
+                <!-- Form Pengeluaran -->
+                <div class="card" style="border-top: 4px solid #e74c3c;">
+                    <div class="card-title">🛒 Tambah Pengeluaran</div>
                     <form id="expenseForm">
                         <div class="form-group">
                             <label>Nama Pengeluaran</label>
-                            <input type="text" id="expName" class="form-control" placeholder="Contoh: Bayar Kos, Makan" required>
+                            <input type="text" id="expName" class="form-control" placeholder="Contoh: Makan Siang, Bensin" required>
                         </div>
                         <div class="form-group">
-                            <label>Jumlah (Rp)</label>
-                            <input type="number" id="expAmount" class="form-control" placeholder="Contoh: 50000" required>
+                            <label>Jumlah Pengeluaran (Rp)</label>
+                            <input type="number" id="expAmount" class="form-control" placeholder="Contoh: 35000" required>
                         </div>
-                        <div class="form-group">
-                            <label>Kategori</label>
-                            <select id="expCategory" class="form-control">
-                                <option value="Kebutuhan">Kebutuhan Pokok</option>
-                                <option value="Hiburan">Hiburan / Self Reward</option>
-                                <option value="Transportasi">Transportasi / Bensin</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn">Simpan Transaksi</button>
+                        <button type="submit" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
                 </div>
             </div>
 
-            <!-- Tabel Riwayat (Kanan) -->
+            <!-- Tabel Riwayat Keuangan (Kanan) -->
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-title">Riwayat Pengeluaran Bulan Ini</div>
+                    <div class="card-title">📋 Buku Kas Global (Arus Kas Masuk & Keluar)</div>
                     <div style="overflow-x: auto;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Nama</th>
-                                    <th>Kategori</th>
-                                    <th>Jumlah</th>
+                                    <th>Keterangan / Item</th>
+                                    <th>Jenis</th>
+                                    <th>Nominal</th>
                                 </tr>
                             </thead>
-                            <tbody id="expenseTableBody">
-                                <!-- Data otomatis masuk kesini via browser -->
+                            <tbody id="financeTableBody">
+                                <!-- Data otomatis dimasukkan oleh logika skrip -->
                             </tbody>
                         </table>
                     </div>
@@ -105,43 +121,78 @@
         </div>
     </div>
 
-    <!-- Sistem Logika Aplikasi (Berjalan otomatis di browser user) -->
+    <!-- Jalur Logika Sistem Finansial -->
     <script>
-        const budget = 5000000;
-        let totalExpense = 0;
+        // Mengambil data terenkripsi lokal dari database browser asli
+        let financeLogs = JSON.parse(localStorage.getItem('itInfraWalletLogs')) || [];
 
+        function refreshDashboard() {
+            let totalIncome = 0;
+            let totalExpense = 0;
+            const tbody = document.getElementById('financeTableBody');
+            tbody.innerHTML = ''; 
+
+            // Memproses log histori keuangan terbalik (Data terbaru muncul di atas)
+            financeLogs.slice().reverse().forEach(log => {
+                let badgeClass = log.type === 'Pemasukan' ? 'badge-income' : 'badge-expense';
+                let textClass = log.type === 'Pemasukan' ? 'text-income' : 'text-expense';
+                let prefix = log.type === 'Pemasukan' ? '+ Rp ' : '- Rp ';
+
+                if(log.type === 'Pemasukan') totalIncome += log.amount;
+                if(log.type === 'Pengeluaran') totalExpense += log.amount;
+
+                const row = `<tr>
+                    <td style="font-weight:600;">\${log.name}</td>
+                    <td><span class="badge \${badgeClass}">\${log.type}</span></td>
+                    <td class="\${textClass}">\${prefix}\${log.amount.toLocaleString('id-ID')}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            const currentBalance = totalIncome - totalExpense;
+
+            document.getElementById('totalIncomeTxt').innerText = 'Rp ' + totalIncome.toLocaleString('id-ID');
+            document.getElementById('totalExpenseTxt').innerText = 'Rp ' + totalExpense.toLocaleString('id-ID');
+            document.getElementById('sisaSaldoTxt').innerText = 'Rp ' + currentBalance.toLocaleString('id-ID');
+
+            // Kontrol Otomatis Infrastruktur Keamanan Saldo
+            if (currentBalance < 0) {
+                document.getElementById('walletAlert').style.display = 'block';
+                document.getElementById('sisaSaldoCard').style.background = '#e74c3c';
+            } else {
+                document.getElementById('walletAlert').style.display = 'none';
+                document.getElementById('sisaSaldoCard').style.background = '#2ecc71';
+            }
+        }
+
+        // Event Handler 1: Eksekusi Pemasukan
+        document.getElementById('incomeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('incName').value;
+            const amount = parseInt(document.getElementById('incAmount').value);
+            
+            financeLogs.push({ name, amount, type: 'Pemasukan' });
+            localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+            
+            refreshDashboard();
+            document.getElementById('incomeForm').reset();
+        });
+
+        // Event Handler 2: Eksekusi Pengeluaran
         document.getElementById('expenseForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const name = document.getElementById('expName').value;
             const amount = parseInt(document.getElementById('expAmount').value);
-            const category = document.getElementById('expCategory').value;
-
-            // 1. Update Hitungan Keuangan
-            totalExpense += amount;
-            const sisaSaldo = budget - totalExpense;
-
-            document.getElementById('totalExpenseTxt').innerText = 'Rp ' + totalExpense.toLocaleString('id-ID');
-            document.getElementById('sisaSaldoTxt').innerText = 'Rp ' + sisaSaldo.toLocaleString('id-ID');
-
-            // 2. Tambah Baris ke Tabel Riwayat
-            const tbody = document.getElementById('expenseTableBody');
-            const row = `<tr>
-                <td style="font-weight:bold;">${name}</td>
-                <td><span class="badge" style="background:#7f8c8d;">${category}</span></td>
-                <td style="color:#e74c3c; font-weight:bold;">Rp ${amount.toLocaleString('id-ID')}</td>
-            </tr>`;
-            tbody.innerHTML += row;
-
-            // 3. Sistem Kontrol Peringatan Otomatis (DevOps Logic)
-            if (totalExpense > budget) {
-                document.getElementById('budgetAlert').style.display = 'block';
-                document.getElementById('sisaSaldoCard').style.background = '#e74c3c';
-            }
-
-            // Reset Form setelah input selesai
+            
+            financeLogs.push({ name, amount, type: 'Pengeluaran' });
+            localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+            
+            refreshDashboard();
             document.getElementById('expenseForm').reset();
         });
+
+        // Tampilkan data saat website diakses pertama kali
+        refreshDashboard();
     </script>
 </body>
 </html>
