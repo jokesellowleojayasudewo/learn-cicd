@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Wallet Control Center - LEO </title>
+    <title>Dynamic Wallet Control Center - LEO</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
         .navbar { background: #2c3e50; color: white; padding: 15px 20px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -51,7 +51,6 @@
         .btn-save-popup { background: #2980b9; }
         .btn-save-popup:hover { background: #3498db; }
         
-        /* WARNA TOMBOL KHUSUS MODAL HAPUS */
         .btn-confirm-delete { background: #e74c3c; }
         .btn-confirm-delete:hover { background: #c0392b; }
 
@@ -79,11 +78,6 @@
                 display: flex; 
                 justify-content: space-between; 
                 align-items: center; 
-            }
-            #kasTable td::before { 
-                content: attr(data-label); 
-                font-weight: bold; 
-                color: #718096; 
             }
             #kasTable td:last-child { 
                 border-bottom: none; 
@@ -125,13 +119,13 @@
                     <form id="incomeForm">
                         <div class="form-group">
                             <label>Sumber / Keterangan</label>
-                            <input type="text" id="incName" class="form-control" placeholder="Sumber Pemasukan/Dana" required>
+                            <input type="text" id="incName" class="form-control" placeholder="Masukan Sumber Dana. Contoh: Gaji" required>
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pemasukan (Rp)</label>
-                            <input type="text" id="incAmount" class="form-control" placeholder="Masukan Nomnial" required>
+                            <input type="text" id="incAmount" class="form-control" placeholder="Masukan Nominal" required>
                         </div>
-                        <button type="submit" class="btn btn-income">Tambah ke Saldo</button>
+                        <button type="submit" id="incBtn" class="btn btn-income">Tambah ke Saldo</button>
                     </form>
                 </div>
 
@@ -141,13 +135,13 @@
                     <form id="expenseForm">
                         <div class="form-group">
                             <label>Nama Pengeluaran</label>
-                            <input type="text" id="expName" class="form-control" placeholder="Tulis detail pengeluaran di sini..." required>
+                            <input type="text" id="expName" class="form-control" placeholder="Masukan Nama Pengeluaran. Contoh: Makan Siang" required>
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pengeluaran (Rp)</label>
                             <input type="text" id="expAmount" class="form-control" placeholder="Masukan Nominal" required>
                         </div>
-                        <button type="submit" class="btn btn-expense">Kurangi Saldo</button>
+                        <button type="submit" id="expBtn" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
                 </div>
             </div>
@@ -163,6 +157,7 @@
                                     <th>Keterangan / Item</th>
                                     <th>Jenis</th>
                                     <th>Nominal</th>
+                                    <th>Waktu</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -197,9 +192,8 @@
         </div>
     </div>
 
-    <!-- STRUKTUR POP-UP INTERAKTIF KECIL UNTUK KONFIRMASI HAPUS DATA KUSTOM -->
     <div id="deleteModal" class="modal-overlay">
-        <div class="modal-content text-center" style="text-align: center;">
+        <div class="modal-content" style="text-align: center;">
             <h3 style="margin-top:0; color:#e74c3c;">⚠️ Konfirmasi Hapus</h3>
             <p style="font-size: 0.95rem; color:#555; margin-bottom:20px;">Apakah Anda yakin ingin menghapus data transaksi ini? Tindakan ini tidak bisa dibatalkan.</p>
             <div class="modal-footer" style="justify-content: center;">
@@ -213,6 +207,19 @@
         let financeLogs = JSON.parse(localStorage.getItem('itInfraWalletLogs')) || [];
         let activeEditIndex = null;
         let deleteTargetIndex = null;
+
+        function dapatkanWaktuSekarang() {
+            const sekarang = new Date();
+            const opsi = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            };
+            return sekarang.toLocaleDateString('id-ID', opsi).replace('pukul ', '');
+        }
 
         function refreshDashboard() {
             let totalIncome = 0;
@@ -231,8 +238,9 @@
 
                 const row = '<tr>' +
                     '<td data-label="Keterangan / Item" style="font-weight:600;">' + log.name + '</td>' +
-                    '<td><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
+                    '<td><div style="display:flex; justify-content:space-between; width:100%;" class="hp-row"><span>Jenis</span><span class="badge ' + badgeClass + '">' + log.type + '</span></div></td>' +
                     '<td data-label="Nominal" class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
+                    '<td data-label="Waktu" style="color:#7f8c8d; font-size:0.9rem;">' + (log.waktu || '-') + '</td>' +
                     '<td data-label="Aksi">' +
                         '<div class="action-buttons-container">' +
                             '<button onclick="openEditModal(' + i + ')" class="btn-action btn-edit">Edit</button>' +
@@ -275,35 +283,34 @@
         document.getElementById('expAmount').addEventListener('input', formatInputRupiah);
         document.getElementById('popAmount').addEventListener('input', formatInputRupiah);
 
-        // Input Pemasukan Normal
         document.getElementById('incomeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('incName').value;
             const amount = cleanRupiahValue(document.getElementById('incAmount').value);
+            const waktu = dapatkanWaktuSekarang();
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pemasukan' });
+                financeLogs.push({ name, amount, type: 'Pemasukan', waktu });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('incomeForm').reset();
             }
         });
 
-        // Input Pengeluaran Normal
         document.getElementById('expenseForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('expName').value;
             const amount = cleanRupiahValue(document.getElementById('expAmount').value);
+            const waktu = dapatkanWaktuSekarang();
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pengeluaran' });
+                financeLogs.push({ name, amount, type: 'Pengeluaran', waktu });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('expenseForm').reset();
             }
         });
 
-        // LOGIKA MEMBUKA POP-UP EDIT KECIL
         function openEditModal(index) {
             const log = financeLogs[index];
             activeEditIndex = index;
@@ -320,16 +327,16 @@
             activeEditIndex = null;
         }
 
-        // SIMPAN DATA DARI POP-UP EDIT KE DATABASE BROWSER
         document.getElementById('popupEditForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if (activeEditIndex !== null) {
                 const name = document.getElementById('popName').value;
                 const amount = cleanRupiahValue(document.getElementById('popAmount').value);
                 const originalType = financeLogs[activeEditIndex].type;
+                const originalWaktu = financeLogs[activeEditIndex].waktu || dapatkanWaktuSekarang();
 
                 if (amount > 0) {
-                    financeLogs[activeEditIndex] = { name, amount, type: originalType };
+                    financeLogs[activeEditIndex] = { name, amount, type: originalType, waktu: originalWaktu };
                     localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                     
                     refreshDashboard();
@@ -338,7 +345,6 @@
             }
         });
 
-        // LOGIKA POP-UP KONFIRMASI HAPUS KUSTOM
         function deleteLog(index) {
             deleteTargetIndex = index;
             document.getElementById('deleteModal').style.display = 'flex';
