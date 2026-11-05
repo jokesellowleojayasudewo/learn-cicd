@@ -36,8 +36,9 @@
         .badge-expense { background: #e74c3c; }
         .text-income { color: #2ecc71; font-weight: bold; }
         .text-expense { color: #e74c3c; font-weight: bold; }
-        .btn-delete { background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-delete:hover { background: #c0392b; }
+        .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-edit { background: #f39c12; margin-right: 5px; }
+        .btn-delete { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -79,7 +80,7 @@
                             <label>Jumlah Pemasukan (Rp)</label>
                             <input type="text" id="incAmount" class="form-control" placeholder="Contoh: 500.000" required>
                         </div>
-                        <button type="submit" class="btn btn-income">Tambah ke Saldo</button>
+                        <button type="submit" id="incBtn" class="btn btn-income">Tambah ke Saldo</button>
                     </form>
                 </div>
 
@@ -95,7 +96,7 @@
                             <label>Jumlah Pengeluaran (Rp)</label>
                             <input type="text" id="expAmount" class="form-control" placeholder="Contoh: 35.000" required>
                         </div>
-                        <button type="submit" class="btn btn-expense">Kurangi Saldo</button>
+                        <button type="submit" id="expBtn" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
                 </div>
             </div>
@@ -127,6 +128,7 @@
     <!-- Jalur Logika Sistem Finansial -->
     <script>
         let financeLogs = JSON.parse(localStorage.getItem('itInfraWalletLogs')) || [];
+        let editIndex = null;
 
         function refreshDashboard() {
             let totalIncome = 0;
@@ -134,12 +136,8 @@
             const tbody = document.getElementById('financeTableBody');
             tbody.innerHTML = ''; 
 
-            // Simpan indeks asli karena kita akan membalik urutan tampilan
-            financeLogs.forEach((log, index) => {
-                log.originalIndex = index;
-            });
-
-            financeLogs.slice().reverse().forEach(log => {
+            for (let i = financeLogs.length - 1; i >= 0; i--) {
+                let log = financeLogs[i];
                 let badgeClass = log.type === 'Pemasukan' ? 'badge-income' : 'badge-expense';
                 let textClass = log.type === 'Pemasukan' ? 'text-income' : 'text-expense';
                 let prefix = log.type === 'Pemasukan' ? '+ Rp ' : '- Rp ';
@@ -151,10 +149,13 @@
                     '<td style="font-weight:600;">' + log.name + '</td>' +
                     '<td><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
-                    '<td><button class="btn-delete" onclick="deleteLog(' + log.originalIndex + ')">Hapus</button></td>' +
+                    '<td>' +
+                        '<button onclick="triggerEdit(' + i + ')" class="btn-action btn-edit">Edit</button>' +
+                        '<button onclick="deleteLog(' + i + ')" class="btn-action btn-delete">Hapus</button>' +
+                    '</td>' +
                 '</tr>';
                 tbody.innerHTML += row;
-            });
+            }
 
             const currentBalance = totalIncome - totalExpense;
 
@@ -168,15 +169,6 @@
             } else {
                 document.getElementById('walletAlert').style.display = 'none';
                 document.getElementById('sisaSaldoCard').style.background = '#2ecc71';
-            }
-        }
-
-        // Fungsi khusus untuk menghapus data berdasarkan indeksnya
-        function deleteLog(index) {
-            if (confirm('Apakah Anda yakin ingin menghapus data transaksi ini?')) {
-                financeLogs.splice(index, 1);
-                localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
-                refreshDashboard();
             }
         }
 
@@ -199,11 +191,16 @@
         document.getElementById('incomeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('incName').value;
-            const rawAmount = document.getElementById('incAmount').value;
-            const amount = cleanRupiahValue(rawAmount);
+            const amount = cleanRupiahValue(document.getElementById('incAmount').value);
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pemasukan' });
+                if (editIndex !== null && financeLogs[editIndex].type === 'Pemasukan') {
+                    financeLogs[editIndex] = { name, amount, type: 'Pemasukan' };
+                    editIndex = null;
+                    document.getElementById('incBtn').innerText = 'Tambah ke Saldo';
+                } else {
+                    financeLogs.push({ name, amount, type: 'Pemasukan' });
+                }
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('incomeForm').reset();
@@ -213,16 +210,52 @@
         document.getElementById('expenseForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('expName').value;
-            const rawAmount = document.getElementById('expAmount').value;
-            const amount = cleanRupiahValue(rawAmount);
+            const amount = cleanRupiahValue(document.getElementById('expAmount').value);
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pengeluaran' });
+                if (editIndex !== null && financeLogs[editIndex].type === 'Pengeluaran') {
+                    financeLogs[editIndex] = { name, amount, type: 'Pengeluaran' };
+                    editIndex = null;
+                    document.getElementById('expBtn').innerText = 'Kurangi Saldo';
+                } else {
+                    financeLogs.push({ name, amount, type: 'Pengeluaran' });
+                }
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('expenseForm').reset();
             }
         });
+
+        function triggerEdit(index) {
+            const log = financeLogs[index];
+            editIndex = index;
+
+            if (log.type === 'Pemasukan') {
+                document.getElementById('incName').value = log.name;
+                document.getElementById('incAmount').value = log.amount.toLocaleString('id-ID');
+                document.getElementById('incBtn').innerText = 'Simpan Perubahan';
+            } else {
+                document.getElementById('expName').value = log.name;
+                document.getElementById('expAmount').value = log.amount.toLocaleString('id-ID');
+                document.getElementById('expBtn').innerText = 'Simpan Perubahan';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteLog(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                financeLogs.splice(index, 1);
+                localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
+                if (editIndex === index) {
+                    editIndex = null;
+                    document.getElementById('incBtn').innerText = 'Tambah ke Saldo';
+                    document.getElementById('expBtn').innerText = 'Kurangi Saldo';
+                    document.getElementById('incomeForm').reset();
+                    document.getElementById('expenseForm').reset();
+                }
+                refreshDashboard();
+            }
+        }
 
         refreshDashboard();
     </script>
