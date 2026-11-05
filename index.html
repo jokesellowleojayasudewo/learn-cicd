@@ -141,11 +141,11 @@
                 if(log.type === 'Pemasukan') totalIncome += log.amount;
                 if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
-                const row = `<tr>
+                const row = '<tr>
                     <td style="font-weight:600;">\${log.name}</td>
                     <td><span class="badge \${badgeClass}">\${log.type}</span></td>
                     <td class="\${textClass}">\${prefix}\${log.amount.toLocaleString('id-ID')}</td>
-                </tr>`;
+                </tr>';
                 tbody.innerHTML += row;
             });
 
