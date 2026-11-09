@@ -30,20 +30,19 @@
         .btn-expense:hover { background: #c0392b; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; vertical-align: middle; }
-        .badge { color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
+        .badge { color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
         .badge-income { background: #2ecc71; }
         .badge-expense { background: #e74c3c; }
         .text-income { color: #2ecc71; font-weight: bold; }
         .text-expense { color: #e74c3c; font-weight: bold; }
-        .btn-action { color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .btn-edit { background: #f39c12; margin-right: 5px; }
-        .btn-edit:hover { background: #e67e22; }
         .btn-delete { background: #e74c3c; }
-        .btn-delete:hover { background: #c0392b; }
 
         .action-buttons-container { display: flex; gap: 5px; }
 
+        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
         .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
@@ -57,6 +56,7 @@
 
         @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+        /* Kunci Khusus Layar HP (Lebar layar maksimal 768 piksel) */
         @media screen and (max-width: 768px) {
             #kasTable, #kasTable thead, #kasTable tbody, #kasTable th, #kasTable td, #kasTable tr { 
                 display: block; 
@@ -67,37 +67,27 @@
             #kasTable tr { 
                 border: 1px solid #e2e8f0; 
                 border-radius: 8px; 
-                padding: 15px; 
-                margin-bottom: 15px; 
+                padding: 12px; 
+                margin-bottom: 12px; 
                 background: #f8fafc; 
                 box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
             #kasTable td { 
                 text-align: right; 
-                padding: 10px 0; 
+                padding: 8px 10px; 
                 border-bottom: 1px dashed #edf2f7; 
                 display: flex; 
                 justify-content: space-between; 
                 align-items: center; 
-                font-size: 0.95rem;
             }
             #kasTable td::before { 
                 content: attr(data-label); 
                 font-weight: bold; 
                 color: #718096; 
-            }
-            #kasTable td:first-child {
-                font-size: 1.1rem;
-                border-bottom: 2px solid #edf2f7;
-                padding-bottom: 8px;
-                margin-bottom: 5px;
-            }
-            #kasTable td:first-child::before {
-                content: "Keterangan";
+                float: left;
             }
             #kasTable td:last-child { 
                 border-bottom: none; 
-                padding-top: 12px;
             }
             .action-buttons-container { justify-content: flex-end; width: 100%; }
         }
@@ -108,8 +98,10 @@
     <div class="navbar">💸 DYNAMIC WALLET CONTROL CENTER</div>
 
     <div class="container">
+        <!-- Peringatan Saldo Minus -->
         <div id="walletAlert" class="alert-box">⚠️ KRISIS KEUANGAN: Sisa saldo Anda minus! Pengeluaran melebihi anggaran tersedia.</div>
 
+        <!-- Ringkasan Finansial Dinamis -->
         <div class="summary-box">
             <div class="summary-card bg-blue">
                 <div>Total Pemasukan Masuk</div>
@@ -126,38 +118,50 @@
         </div>
 
         <div class="row">
+            <!-- Panel Input Baru (Kiri) -->
             <div class="col-md-4">
+                <!-- Form Pemasukan -->
                 <div class="card" style="border-top: 4px solid #2ecc71;">
                     <div class="card-title">💰 Tambah Pemasukan</div>
                     <form id="incomeForm">
                         <div class="form-group">
                             <label>Sumber / Keterangan</label>
-                            <input type="text" id="incName" class="form-control" placeholder="Masukan Sumber Pemasukan..." required>
+                            <input type="text" id="incName" class="form-control" placeholder="Contoh: Gaji Magang, Uang Bulanan" required>
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pemasukan (Rp)</label>
-                            <input type="text" id="incAmount" class="form-control" placeholder="Masukan Nominal..." required>
+                            <input type="text" id="incAmount" class="form-control" placeholder="Contoh: 500.000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal & Waktu Transaksi</label>
+                            <input type="datetime-local" id="incDateTime" class="form-control">
                         </div>
                         <button type="submit" id="incBtn" class="btn btn-income">Tambah ke Saldo</button>
                     </form>
                 </div>
 
+                <!-- Form Pengeluaran -->
                 <div class="card" style="border-top: 4px solid #e74c3c;">
                     <div class="card-title">🛒 Tambah Pengeluaran</div>
                     <form id="expenseForm">
                         <div class="form-group">
                             <label>Nama Pengeluaran</label>
-                            <input type="text" id="expName" class="form-control" placeholder="Masukan Nama Pengeluaran..." required>
+                            <input type="text" id="expName" class="form-control" placeholder="Contoh: Makan Siang, Bensin" required>
                         </div>
                         <div class="form-group">
                             <label>Jumlah Pengeluaran (Rp)</label>
-                            <input type="text" id="expAmount" class="form-control" placeholder="Masukan Nominal..." required>
+                            <input type="text" id="expAmount" class="form-control" placeholder="Contoh: 35.000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal & Waktu Transaksi</label>
+                            <input type="datetime-local" id="expDateTime" class="form-control">
                         </div>
                         <button type="submit" id="expBtn" class="btn btn-expense">Kurangi Saldo</button>
                     </form>
                 </div>
             </div>
 
+            <!-- Tabel Riwayat Keuangan (Kanan) -->
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-title">📋 Buku Kas Global (Arus Kas Masuk & Keluar)</div>
@@ -173,6 +177,7 @@
                                 </tr>
                             </thead>
                             <tbody id="financeTableBody">
+                                <!-- Data otomatis dimasukkan oleh logika skrip -->
                             </tbody>
                         </table>
                     </div>
@@ -181,6 +186,7 @@
         </div>
     </div>
 
+    <!-- STRUKTUR POP-UP INTERAKTIF KECIL UNTUK EDIT DATA -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="modalTitle" style="margin-top:0; color:#2c3e50; border-bottom:2px solid #ecf0f1; padding-bottom:8px;">✏️ Edit Transaksi</h3>
@@ -192,6 +198,10 @@
                 <div class="form-group">
                     <label>Nominal Rupiah (Rp)</label>
                     <input type="text" id="popAmount" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal & Waktu</label>
+                    <input type="datetime-local" id="popDateTime" class="form-control" required>
                 </div>
                 <div class="modal-footer">
                     <button type="button" onclick="closeModal()" class="btn btn-close">Batal</button>
@@ -217,8 +227,7 @@
         let activeEditIndex = null;
         let deleteTargetIndex = null;
 
-        function dapatkanWaktuSekarang() {
-            const sekarang = new Date();
+        function konversiKeTeksWaktu(dateObj) {
             const opsi = { 
                 weekday: 'long', 
                 day: 'numeric', 
@@ -227,7 +236,33 @@
                 hour: '2-digit', 
                 minute: '2-digit' 
             };
-            return sekarang.toLocaleDateString('id-ID', opsi).replace('pukul ', '');
+            return dateObj.toLocaleDateString('id-ID', opsi).replace('pukul ', '');
+        }
+
+        function dapatkanWaktuPilihan(inputDateTimeValue) {
+            if (inputDateTimeValue) {
+                return new Date(inputDateTimeValue);
+            }
+            return new Date();
+        }
+
+        function formatIsoUntukInput(dateStrTextOrIso) {
+            let d;
+            if (!dateStrTextOrIso) {
+                d = new Date();
+            } else if (dateStrTextOrIso.includes('GMT') || dateStrTextOrIso.match(/[a-zA-Z]/)) {
+                d = new Date(dateStrTextOrIso);
+                if (isNaN(d.getTime())) {
+                    d = new Date();
+                }
+            } else {
+                d = new Date(dateStrTextOrIso);
+                if (isNaN(d.getTime())) d = new Date();
+            }
+            
+            const tzoffset = d.getTimezoneOffset() * 60000; 
+            const localISOTime = (new Date(d.getTime() - tzoffset)).toISOString().slice(0, 16);
+            return localISOTime;
         }
 
         function refreshDashboard() {
@@ -245,11 +280,18 @@
                 if(log.type === 'Pemasukan') totalIncome += log.amount;
                 if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
+                let waktuTampil = log.waktuTeks;
+                if (!waktuTampil && log.waktu) {
+                    waktuTampil = konversiKeTeksWaktu(new Date(log.waktu));
+                } else if (!waktuTampil) {
+                    waktuTampil = '-';
+                }
+
                 const row = '<tr>' +
-                    '<td>' + log.name + '</td>' +
+                    '<td data-label="Keterangan / Item" style="font-weight:600;">' + log.name + '</td>' +
                     '<td data-label="Jenis"><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
                     '<td data-label="Nominal" class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
-                    '<td data-label="Waktu" style="color:#7f8c8d; font-size:0.9rem;">' + (log.waktu || '-') + '</td>' +
+                    '<td data-label="Waktu" style="color:#7f8c8d; font-size:0.9rem;">' + waktuTampil + '</td>' +
                     '<td data-label="Aksi">' +
                         '<div class="action-buttons-container">' +
                             '<button onclick="openEditModal(' + i + ')" class="btn-action btn-edit">Edit</button>' +
@@ -296,10 +338,12 @@
             e.preventDefault();
             const name = document.getElementById('incName').value;
             const amount = cleanRupiahValue(document.getElementById('incAmount').value);
-            const waktu = dapatkanWaktuSekarang();
+            const dateObj = dapatkanWaktuPilihan(document.getElementById('incDateTime').value);
+            const waktuIso = dateObj.toISOString();
+            const waktuTeks = konversiKeTeksWaktu(dateObj);
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pemasukan', waktu });
+                financeLogs.push({ name, amount, type: 'Pemasukan', waktu: waktuIso, waktuTeks: waktuTeks });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('incomeForm').reset();
@@ -310,10 +354,12 @@
             e.preventDefault();
             const name = document.getElementById('expName').value;
             const amount = cleanRupiahValue(document.getElementById('expAmount').value);
-            const waktu = dapatkanWaktuSekarang();
+            const dateObj = dapatkanWaktuPilihan(document.getElementById('expDateTime').value);
+            const waktuIso = dateObj.toISOString();
+            const waktuTeks = konversiKeTeksWaktu(dateObj);
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pengeluaran', waktu });
+                financeLogs.push({ name, amount, type: 'Pengeluaran', waktu: waktuIso, waktuTeks: waktuTeks });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('expenseForm').reset();
@@ -327,6 +373,8 @@
             document.getElementById('modalTitle').innerText = log.type === 'Pemasukan' ? '✏️ Edit Log Pemasukan' : '✏️ Edit Log Pengeluaran';
             document.getElementById('popName').value = log.name;
             document.getElementById('popAmount').value = log.amount.toLocaleString('id-ID');
+            
+            document.getElementById('popDateTime').value = formatIsoUntukInput(log.waktu);
             
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -342,10 +390,13 @@
                 const name = document.getElementById('popName').value;
                 const amount = cleanRupiahValue(document.getElementById('popAmount').value);
                 const originalType = financeLogs[activeEditIndex].type;
-                const originalWaktu = financeLogs[activeEditIndex].waktu || dapatkanWaktuSekarang();
+                
+                const chosenDate = new Date(document.getElementById('popDateTime').value);
+                const waktuIso = chosenDate.toISOString();
+                const waktuTeks = konversiKeTeksWaktu(chosenDate);
 
                 if (amount > 0) {
-                    financeLogs[activeEditIndex] = { name, amount, type: originalType, waktu: originalWaktu };
+                    financeLogs[activeEditIndex] = { name, amount, type: originalType, waktu: waktuIso, waktuTeks: waktuTeks };
                     localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                     
                     refreshDashboard();
