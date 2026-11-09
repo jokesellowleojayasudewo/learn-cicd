@@ -306,6 +306,14 @@
 
             for (let i = financeLogs.length - 1; i >= 0; i--) {
                 let log = financeLogs[i];
+
+                // Akumulasi total pemasukan dan pengeluaran
+                if (log.type === 'Pemasukan') {
+                    totalIncome += log.amount;
+                } else if (log.type === 'Pengeluaran') {
+                    totalExpense += log.amount;
+                }
+
                 let badgeClass = log.type === 'Pemasukan' ? 'badge-income' : 'badge-expense';
                 let textClass = log.type === 'Pemasukan' ? 'text-income' : 'text-expense';
                 let prefix = log.type === 'Pemasukan' ? '+ Rp ' : '- Rp ';
