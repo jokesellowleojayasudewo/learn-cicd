@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Wallet Control Center - Leo</title>
+    <title>Dynamic Wallet Control Center - LEO</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
         .navbar { background: #2c3e50; color: white; padding: 15px 20px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -38,7 +38,6 @@
         th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
         td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; vertical-align: middle; }
         
-        /* Proteksi kolom nominal agar muat ratusan juta rupiah tanpa terpotong */
         .col-nominal { white-space: nowrap; min-width: 150px; font-weight: bold; }
         .col-waktu { min-width: 160px; color: #555; }
         
@@ -55,7 +54,6 @@
         .btn-delete:hover { background: #c0392b; }
         .action-buttons-container { display: flex; gap: 5px; }
 
-        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 420px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
         .modal-footer { display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; }
@@ -66,12 +64,10 @@
         .btn-confirm-delete { background: #e74c3c; width: auto; min-width: 100px; }
         .btn-confirm-delete:hover { background: #c0392b; }
 
-        /* Elemen input kalender tersembunyi yang diaktifkan via tombol ikon */
         .hidden-date-picker { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
 
         @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* Kunci Khusus Layar HP (Lebar layar maksimal 768 piksel) */
         @media screen and (max-width: 768px) {
             #kasTable, #kasTable thead, #kasTable tbody, #kasTable th, #kasTable td, #kasTable tr { 
                 display: block; 
@@ -110,12 +106,11 @@
 </head>
 <body>
 
-    <div class="navbar">💸 DYNAMIC PRIVATE WALLET CONTROL CENTER LEO</div>
+    <div class="navbar">💸 DYNAMIC WALLET PRIVATE CONTROL CENTER</div>
 
     <div class="container">
         <div id="walletAlert" class="alert-box">⚠️ KRISIS KEUANGAN: Sisa saldo Anda minus! Pengeluaran melebihi anggaran tersedia.</div>
 
-        <!-- Ringkasan Finansial Dinamis -->
         <div class="summary-box">
             <div class="summary-card bg-blue">
                 <div>Total Pemasukan Masuk</div>
@@ -132,9 +127,7 @@
         </div>
 
         <div class="row">
-            <!-- Panel Input Baru (Kiri) -->
             <div class="col-md-4">
-                <!-- Form Pemasukan -->
                 <div class="card" style="border-top: 4px solid #2ecc71;">
                     <div class="card-title">💰 Tambah Pemasukan</div>
                     <form id="incomeForm">
@@ -149,7 +142,7 @@
                         <div class="form-group">
                             <label>Tanggal & Waktu</label>
                             <div class="input-group">
-                                <input type="text" id="incDateText" class="form-control" placeholder="Tgl/Bln/Thn Jam:Menit">
+                                <input type="text" id="incDateText" class="form-control" placeholder="Tgl/Bln/Tahun Jam:Menit">
                                 <button type="button" class="btn-calendar" onclick="openPicker('incDatePicker')">📅</button>
                                 <input type="datetime-local" id="incDatePicker" class="hidden-date-picker" onchange="syncPickerToText('incDatePicker', 'incDateText')">
                             </div>
@@ -158,7 +151,6 @@
                     </form>
                 </div>
 
-                <!-- Form Pengeluaran -->
                 <div class="card" style="border-top: 4px solid #e74c3c;">
                     <div class="card-title">🛒 Tambah Pengeluaran</div>
                     <form id="expenseForm">
@@ -173,7 +165,7 @@
                         <div class="form-group">
                             <label>Tanggal & Waktu</label>
                             <div class="input-group">
-                                <input type="text" id="expDateText" class="form-control" placeholder="Tgl/Bln/Thn Jam:Menit">
+                                <input type="text" id="expDateText" class="form-control" placeholder="Tgl/Bln/Tahun Jam:Menit">
                                 <button type="button" class="btn-calendar" onclick="openPicker('expDatePicker')">📅</button>
                                 <input type="datetime-local" id="expDatePicker" class="hidden-date-picker" onchange="syncPickerToText('expDatePicker', 'expDateText')">
                             </div>
@@ -183,7 +175,6 @@
                 </div>
             </div>
 
-            <!-- Tabel Riwayat Keuangan (Kanan) -->
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-title">📋 Buku Kas Global (Arus Kas Masuk & Keluar)</div>
@@ -199,7 +190,6 @@
                                 </tr>
                             </thead>
                             <tbody id="financeTableBody">
-                                <!-- Data otomatis dimasukkan oleh logika skrip -->
                             </tbody>
                         </table>
                     </div>
@@ -208,7 +198,6 @@
         </div>
     </div>
 
-    <!-- STRUKTUR POP-UP INTERAKTIF KECIL UNTUK EDIT DATA -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="modalTitle" style="margin-top:0; color:#2c3e50; border-bottom:2px solid #ecf0f1; padding-bottom:8px;">✏️ Edit Transaksi</h3>
@@ -237,7 +226,6 @@
         </div>
     </div>
 
-    <!-- POP-UP KONFIRMASI HAPUS -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-content" style="text-align: center;">
             <h3 style="margin-top:0; color:#e74c3c;">⚠️ Konfirmasi Hapus</h3>
@@ -254,7 +242,6 @@
         let activeEditIndex = null;
         let deleteTargetIndex = null;
 
-        // Generator Stempel Waktu Cantik dari String format DD/MM/YYYY HH:MM
         function parseKeWaktuCantik(stringTanggal) {
             if (!stringTanggal) return '-';
             try {
@@ -273,9 +260,6 @@
 
                 const objekTanggal = new Date(tahun, bulanIndex, tanggal, jam, menit);
                 const daftarHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-                const daftarBulan = ['Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'];
-                
-                // Penyesuaian nama bulan bahasa Indonesia
                 const namaBulanId = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
                 const hari = daftarHari[objekTanggal.getDay()];
@@ -293,8 +277,8 @@
             const dd = sekarang.getDate().toString().padStart(2, '0');
             const mm = (sekarang.getMonth() + 1).toString().padStart(2, '0');
             const yyyy = sekarang.getFullYear();
-            const hh = sekarang.getHours().toString().padStart(2, '0');
-            const min = sekaran.getMinutes().toString().padStart(2, '0');
+            const hh = Thermal = sekarang.getHours().toString().padStart(2, '0');
+            const min = sekarang.getMinutes().toString().padStart(2, '0');
             return dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
         }
 
@@ -303,11 +287,11 @@
         }
 
         function syncPickerToText(idPicker, idText) {
-            const val = document.getElementById(idPicker).value; // format: YYYY-MM-DDTHH:MM
+            const val = document.getElementById(idPicker).value;
             if (val) {
                 const parts = val.split('T');
-                const dateParts = parts[0].split('-'); // YYYY, MM, DD
-                const timeParts = parts[1].split(':'); // HH, MM
+                const dateParts = parts[0].split('-');
+                const timeParts = parts[1].split(':');
                 
                 const formatted = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0] + ' ' + timeParts[0] + ':' + timeParts[1];
                 document.getElementById(idText).value = formatted;
@@ -325,9 +309,6 @@
                 let badgeClass = log.type === 'Pemasukan' ? 'badge-income' : 'badge-expense';
                 let textClass = log.type === 'Pemasukan' ? 'text-income' : 'text-expense';
                 let prefix = log.type === 'Pemasukan' ? '+ Rp ' : '- Rp ';
-
-                if(log.type === 'Pemasukan') totalIncome += log.amount;
-                if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
                 const waktuCantik = parseKeWaktuCantik(log.waktuTeks || log.waktu);
 
@@ -395,7 +376,6 @@
         document.getElementById('expDateText').addEventListener('input', formatInputTanggalMask);
         document.getElementById('popDateText').addEventListener('input', formatInputTanggalMask);
 
-        // Input Pemasukan Normal
         document.getElementById('incomeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('incName').value;
@@ -411,7 +391,6 @@
             }
         });
 
-        // Input Pengeluaran Normal
         document.getElementById('expenseForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('expName').value;
@@ -427,7 +406,6 @@
             }
         });
 
-        // LOGIKA MEMBUKA POP-UP EDIT KECIL
         function openEditModal(index) {
             const log = financeLogs[index];
             activeEditIndex = index;
@@ -445,7 +423,6 @@
             activeEditIndex = null;
         }
 
-        // SIMPAN DATA DARI POP-UP EDIT KE DATABASE BROWSER
         document.getElementById('popupEditForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if (activeEditIndex !== null) {
@@ -464,7 +441,6 @@
             }
         });
 
-        // LOGIKA POP-UP KONFIRMASI HAPUS KUSTOM
         function deleteLog(index) {
             deleteTargetIndex = index;
             document.getElementById('deleteModal').style.display = 'flex';
@@ -484,7 +460,6 @@
             }
         }
 
-        // Jalankan render awal saat sistem pertama dimuat
         refreshDashboard();
     </script>
 </body>
