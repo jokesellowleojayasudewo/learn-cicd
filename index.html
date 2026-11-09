@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Wallet Control Center - IT Infra</title>
+    <title>Dynamic Wallet Control Center - Leo</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 0; }
         .navbar { background: #2c3e50; color: white; padding: 15px 20px; font-weight: bold; font-size: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         .row { display: flex; gap: 20px; flex-wrap: wrap; }
         .col-md-4 { flex: 1; min-width: 320px; }
         .col-md-8 { flex: 2; min-width: 350px; }
@@ -20,17 +20,14 @@
         .bg-green { background: #2ecc71; }
         .summary-value { font-size: 1.4rem; font-weight: bold; margin: 5px 0 0 0; }
         .alert-box { background: #fdf2e2; border-left: 5px solid #e74c3c; padding: 15px; border-radius: 4px; margin-bottom: 20px; display: none; color: #c0392b; font-weight: bold; }
+        
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+        .input-group { display: flex; gap: 5px; }
         .form-control { width: 100%; padding: 8px 10px; border: 1px solid #bdc3c7; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; }
+        .btn-calendar { background: #34495e; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+        .btn-calendar:hover { background: #2c3e50; }
         
-        /* WRAPPER UNTUK INPUT HYBRID */
-        .date-input-wrapper { position: relative; display: flex; align-items: center; }
-        .date-input-wrapper .form-control { padding-right: 40px; }
-        .calendar-btn-container { position: absolute; right: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; width: 24px; height: 24px; }
-        .calendar-native-picker { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-        .calendar-icon { font-size: 1.2rem; pointer-events: none; }
-
         .btn { color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 0.95rem; font-weight: bold; transition: 0.2s; margin-top: 5px; }
         .btn-income { background: #2ecc71; }
         .btn-income:hover { background: #27ae60; }
@@ -39,41 +36,75 @@
         
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { background: #f8f9fa; padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 0.95rem; vertical-align: middle; }
         
-        .badge { color: white; padding: 3px 7px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        /* Proteksi kolom nominal agar muat ratusan juta rupiah tanpa terpotong */
+        .col-nominal { white-space: nowrap; min-width: 150px; font-weight: bold; }
+        .col-waktu { min-width: 160px; color: #555; }
+        
+        .badge { color: white; padding: 5px 9px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
         .badge-income { background: #2ecc71; }
         .badge-expense { background: #e74c3c; }
-        .text-income { color: #2ecc71; font-weight: bold; }
-        .text-expense { color: #e74c3c; font-weight: bold; }
+        .text-income { color: #2ecc71; }
+        .text-expense { color: #e74c3c; }
         
-        .btn-action { color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-action { color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
         .btn-edit { background: #f39c12; margin-right: 5px; }
+        .btn-edit:hover { background: #d35400; }
         .btn-delete { background: #e74c3c; }
+        .btn-delete:hover { background: #c0392b; }
         .action-buttons-container { display: flex; gap: 5px; }
 
+        /* ARSITEKTUR KODE POP-UP MODAL KUSTOM */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
-        .modal-footer { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-close { background: #7f8c8d; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 420px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
+        .modal-footer { display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; }
+        .btn-close { background: #7f8c8d; width: auto; min-width: 80px; }
         .btn-close:hover { background: #95a5a6; }
-        .btn-save-popup { background: #2980b9; }
+        .btn-save-popup { background: #2980b9; width: auto; }
         .btn-save-popup:hover { background: #3498db; }
-        .btn-confirm-delete { background: #e74c3c; }
+        .btn-confirm-delete { background: #e74c3c; width: auto; min-width: 100px; }
         .btn-confirm-delete:hover { background: #c0392b; }
+
+        /* Elemen input kalender tersembunyi yang diaktifkan via tombol ikon */
+        .hidden-date-picker { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
 
         @keyframes fadeIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+        /* Kunci Khusus Layar HP (Lebar layar maksimal 768 piksel) */
         @media screen and (max-width: 768px) {
-            #kasTable, #kasTable thead, #kasTable tbody, #kasTable th, #kasTable td, #kasTable tr { display: block; }
-            #kasTable thead { display: none; }
-            #kasTable tr { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #f8fafc; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-            #kasTable td { text-align: right; padding: 8px 10px; border-bottom: 1px dashed #edf2f7; display: flex; justify-content: space-between; align-items: center; }
-            
-            /* SINKRONISASI TAMPILAN HP AGAR RAPI */
-            #kasTable td::before { content: attr(data-label); font-weight: bold; color: #718096; float: left; text-align: left; }
-            #kasTable td:last-child { border-bottom: none; }
+            #kasTable, #kasTable thead, #kasTable tbody, #kasTable th, #kasTable td, #kasTable tr { 
+                display: block; 
+            }
+            #kasTable thead { 
+                display: none; 
+            }
+            #kasTable tr { 
+                border: 1px solid #e2e8f0; 
+                border-radius: 8px; 
+                padding: 12px; 
+                margin-bottom: 12px; 
+                background: #f8fafc; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+            #kasTable td { 
+                text-align: right; 
+                padding: 8px 5px; 
+                border-bottom: 1px dashed #edf2f7; 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+            }
+            #kasTable td::before { 
+                content: attr(data-label); 
+                font-weight: bold; 
+                color: #718096; 
+            }
+            #kasTable td:last-child { 
+                border-bottom: none; 
+            }
             .action-buttons-container { justify-content: flex-end; width: 100%; }
+            .col-nominal { white-space: normal; text-align: right; }
         }
     </style>
 </head>
@@ -84,6 +115,7 @@
     <div class="container">
         <div id="walletAlert" class="alert-box">⚠️ KRISIS KEUANGAN: Sisa saldo Anda minus! Pengeluaran melebihi anggaran tersedia.</div>
 
+        <!-- Ringkasan Finansial Dinamis -->
         <div class="summary-box">
             <div class="summary-card bg-blue">
                 <div>Total Pemasukan Masuk</div>
@@ -100,6 +132,7 @@
         </div>
 
         <div class="row">
+            <!-- Panel Input Baru (Kiri) -->
             <div class="col-md-4">
                 <!-- Form Pemasukan -->
                 <div class="card" style="border-top: 4px solid #2ecc71;">
@@ -114,13 +147,11 @@
                             <input type="text" id="incAmount" class="form-control" placeholder="Contoh: 500.000" required>
                         </div>
                         <div class="form-group">
-                            <label>Tanggal & Waktu</label>
-                            <div class="date-input-wrapper">
-                                <input type="text" id="incDate" class="form-control" placeholder="Tgl/Bln/Thn Jam:Menit" maxlength="16">
-                                <div class="calendar-btn-container">
-                                    <span class="calendar-icon">📅</span>
-                                    <input type="datetime-local" class="calendar-native-picker" onchange="syncPickerToText(this, 'incDate')">
-                                </div>
+                            <label>Tanggal & Waktu (Opsional)</label>
+                            <div class="input-group">
+                                <input type="text" id="incDateText" class="form-control" placeholder="DD/MM/YYYY HH:MM">
+                                <button type="button" class="btn-calendar" onclick="openPicker('incDatePicker')">📅</button>
+                                <input type="datetime-local" id="incDatePicker" class="hidden-date-picker" onchange="syncPickerToText('incDatePicker', 'incDateText')">
                             </div>
                         </div>
                         <button type="submit" id="incBtn" class="btn btn-income">Tambah ke Saldo</button>
@@ -140,13 +171,11 @@
                             <input type="text" id="expAmount" class="form-control" placeholder="Contoh: 35.000" required>
                         </div>
                         <div class="form-group">
-                            <label>Tanggal & Waktu</label>
-                            <div class="date-input-wrapper">
-                                <input type="text" id="expDate" class="form-control" placeholder="Tgl/Bln/Thn Jam:Menit" maxlength="16">
-                                <div class="calendar-btn-container">
-                                    <span class="calendar-icon">📅</span>
-                                    <input type="datetime-local" class="calendar-native-picker" onchange="syncPickerToText(this, 'expDate')">
-                                </div>
+                            <label>Tanggal & Waktu (Opsional)</label>
+                            <div class="input-group">
+                                <input type="text" id="expDateText" class="form-control" placeholder="DD/MM/YYYY HH:MM">
+                                <button type="button" class="btn-calendar" onclick="openPicker('expDatePicker')">📅</button>
+                                <input type="datetime-local" id="expDatePicker" class="hidden-date-picker" onchange="syncPickerToText('expDatePicker', 'expDateText')">
                             </div>
                         </div>
                         <button type="submit" id="expBtn" class="btn btn-expense">Kurangi Saldo</button>
@@ -154,6 +183,7 @@
                 </div>
             </div>
 
+            <!-- Tabel Riwayat Keuangan (Kanan) -->
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-title">📋 Buku Kas Global (Arus Kas Masuk & Keluar)</div>
@@ -168,7 +198,9 @@
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="financeTableBody"></tbody>
+                            <tbody id="financeTableBody">
+                                <!-- Data otomatis dimasukkan oleh logika skrip -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -191,12 +223,10 @@
                 </div>
                 <div class="form-group">
                     <label>Tanggal & Waktu</label>
-                    <div class="date-input-wrapper">
-                        <input type="text" id="popDate" class="form-control" placeholder="DD/MM/YYYY HH:MM" maxlength="16" required>
-                        <div class="calendar-btn-container">
-                            <span class="calendar-icon">📅</span>
-                            <input type="datetime-local" class="calendar-native-picker" onchange="syncPickerToText(this, 'popDate')">
-                        </div>
+                    <div class="input-group">
+                        <input type="text" id="popDateText" class="form-control" placeholder="DD/MM/YYYY HH:MM" required>
+                        <button type="button" class="btn-calendar" onclick="openPicker('popDatePicker')">📅</button>
+                        <input type="datetime-local" id="popDatePicker" class="hidden-date-picker" onchange="syncPickerToText('popDatePicker', 'popDateText')">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -207,13 +237,14 @@
         </div>
     </div>
 
+    <!-- POP-UP KONFIRMASI HAPUS -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-content" style="text-align: center;">
             <h3 style="margin-top:0; color:#e74c3c;">⚠️ Konfirmasi Hapus</h3>
             <p style="font-size: 0.95rem; color:#555; margin-bottom:20px;">Apakah Anda yakin ingin menghapus data transaksi ini? Tindakan ini tidak bisa dibatalkan.</p>
             <div class="modal-footer" style="justify-content: center;">
-                <button type="button" onclick="closeDeleteModal()" class="btn btn-close" style="width: auto; min-width: 80px;">Batal</button>
-                <button type="button" onclick="confirmDelete()" class="btn btn-confirm-delete" style="width: auto; min-width: 100px;">Ya, Hapus</button>
+                <button type="button" onclick="closeDeleteModal()" class="btn btn-close">Batal</button>
+                <button type="button" onclick="confirmDelete()" class="btn btn-confirm-delete">Ya, Hapus</button>
             </div>
         </div>
     </div>
@@ -223,56 +254,64 @@
         let activeEditIndex = null;
         let deleteTargetIndex = null;
 
-        function dapatkanWaktuSekarang() {
-            const sekarang = new Date();
-            return ubahDateKeFormatTeks(sekarang);
-        }
-
-        function ubahDateKeFormatTeks(dateObj) {
-            const opsi = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return dateObj.toLocaleDateString('id-ID', opsi).replace('pukul ', '').replace('.', ':');
-        }
-
-        function parseFormatInputKeDate(str) {
-            // Mengubah format "DD/MM/YYYY HH:MM" menjadi objek Date asli
+        // Generator Stempel Waktu Cantik dari String format DD/MM/YYYY HH:MM
+        function parseKeWaktuCantik(stringTanggal) {
+            if (!stringTanggal) return '-';
             try {
-                const parts = str.split(' ');
-                if(parts.length !== 2) return null;
-                const dParts = parts[0].split('/');
-                const tParts = parts[1].split(':');
-                if(dParts.length !== 3 || tParts.length !== 2) return null;
+                const parts = stringTanggal.split(' ');
+                if (parts.length !== 2) return stringTanggal;
                 
-                const day = parseInt(dParts[0], 10);
-                const month = parseInt(dParts[1], 10) - 1;
-                const year = parseInt(dParts[2], 10);
-                const hour = parseInt(tParts[0], 10);
-                const minute = parseInt(tParts[1], 10);
+                const dateParts = parts[0].split('/');
+                const timeParts = parts[1].split(':');
+                if (dateParts.length !== 3 || timeParts.length !== 2) return stringTanggal;
+
+                const tanggal = parseInt(dateParts[0], 10);
+                const bulanIndex = parseInt(dateParts[1], 10) - 1;
+                const tahun = parseInt(dateParts[2], 10);
+                const jam = parseInt(timeParts[0], 10);
+                const menit = parseInt(timeParts[1], 10);
+
+                const objekTanggal = new Date(tahun, bulanIndex, tanggal, jam, menit);
+                const daftarHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                const daftarBulan = ['Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'];
                 
-                const d = new Date(year, month, day, hour, minute);
-                return isNaN(d.getTime()) ? null : d;
+                // Penyesuaian nama bulan bahasa Indonesia
+                const namaBulanId = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+                const hari = daftarHari[objekTanggal.getDay()];
+                const bulan = namaBulanId[objekTanggal.getMonth()];
+                const formatJam = jam.toString().padStart(2, '0') + '.' + menit.toString().padStart(2, '0');
+
+                return hari + ', ' + tanggal + ' ' + bulan + ' ' + tahun + ', ' + formatJam;
             } catch(e) {
-                return null;
+                return stringTanggal;
             }
         }
 
-        function formatTanggalTeksDariInput(str) {
-            const d = parseFormatInputKeDate(str);
-            if (!d) return str;
-            return ubahDateKeFormatTeks(d);
+        function dapatkanWaktuSekarangString() {
+            const sekarang = new Date();
+            const dd = sekarang.getDate().toString().padStart(2, '0');
+            const mm = (sekarang.getMonth() + 1).toString().padStart(2, '0');
+            const yyyy = sekarang.getFullYear();
+            const hh = sekarang.getHours().toString().padStart(2, '0');
+            const min = sekaran.getMinutes().toString().padStart(2, '0');
+            return dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
         }
 
-        function syncPickerToText(picker, textInputId) {
-            if (!picker.value) return;
-            const d = new Date(picker.value);
-            if (isNaN(d.getTime())) return;
-            
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            const hour = String(d.getHours()).padStart(2, '0');
-            const minute = String(d.getMinutes()).padStart(2, '0');
-            
-            document.getElementById(textInputId).value = day + '/' + month + '/' + year + ' ' + hour + ':' + minute;
+        function openPicker(idPicker) {
+            document.getElementById(idPicker).showPicker();
+        }
+
+        function syncPickerToText(idPicker, idText) {
+            const val = document.getElementById(idPicker).value; // format: YYYY-MM-DDTHH:MM
+            if (val) {
+                const parts = val.split('T');
+                const dateParts = parts[0].split('-'); // YYYY, MM, DD
+                const timeParts = parts[1].split(':'); // HH, MM
+                
+                const formatted = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0] + ' ' + timeParts[0] + ':' + timeParts[1];
+                document.getElementById(idText).value = formatted;
+            }
         }
 
         function refreshDashboard() {
@@ -290,11 +329,13 @@
                 if(log.type === 'Pemasukan') totalIncome += log.amount;
                 if(log.type === 'Pengeluaran') totalExpense += log.amount;
 
+                const waktuCantik = parseKeWaktuCantik(log.waktuTeks || log.waktu);
+
                 const row = '<tr>' +
                     '<td data-label="Keterangan / Item" style="font-weight:600;">' + log.name + '</td>' +
                     '<td data-label="Jenis"><span class="badge ' + badgeClass + '">' + log.type + '</span></td>' +
-                    '<td data-label="Nominal" class="' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
-                    '<td data-label="Waktu" style="color:#7f8c8d; font-size:0.9rem;">' + (log.waktuTeksTampil || log.waktu || '-') + '</td>' +
+                    '<td data-label="Nominal" class="col-nominal ' + textClass + '">' + prefix + log.amount.toLocaleString('id-ID') + '</td>' +
+                    '<td data-label="Waktu" class="col-waktu">' + waktuCantik + '</td>' +
                     '<td data-label="Aksi">' +
                         '<div class="action-buttons-container">' +
                             '<button onclick="openEditModal(' + i + ')" class="btn-action btn-edit">Edit</button>' +
@@ -350,74 +391,43 @@
         document.getElementById('expAmount').addEventListener('input', formatInputRupiah);
         document.getElementById('popAmount').addEventListener('input', formatInputRupiah);
 
-        document.getElementById('incDate').addEventListener('input', formatInputTanggalMask);
-        document.getElementById('expDate').addEventListener('input', formatInputTanggalMask);
-        document.getElementById('popDate').addEventListener('input', formatInputTanggalMask);
+        document.getElementById('incDateText').addEventListener('input', formatInputTanggalMask);
+        document.getElementById('expDateText').addEventListener('input', formatInputTanggalMask);
+        document.getElementById('popDateText').addEventListener('input', formatInputTanggalMask);
 
+        // Input Pemasukan Normal
         document.getElementById('incomeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('incName').value;
             const amount = cleanRupiahValue(document.getElementById('incAmount').value);
-            const dateInput = document.getElementById('incDate').value;
-            
-            let waktuTeksTampil = dapatkanWaktuSekarang();
-            let rawWaktuInput = dateInput;
-            
-            if (dateInput.length === 16) {
-                const parsedDate = parseFormatInputKeDate(dateInput);
-                if (parsedDate) {
-                    waktuTeksTampil = ubahDateKeFormatTeks(parsedDate);
-                }
-            } else {
-                const sekarang = new Date();
-                const day = String(sekarang.getDate()).padStart(2, '0');
-                const month = String(sekarang.getMonth() + 1).padStart(2, '0');
-                const year = sekarang.getFullYear();
-                const hour = String(sekarang.getHours()).padStart(2, '0');
-                const minute = String(sekarang.getMinutes()).padStart(2, '0');
-                rawWaktuInput = day + '/' + month + '/' + year + ' ' + hour + ':' + minute;
-            }
+            let waktuTeks = document.getElementById('incDateText').value;
+            if (!waktuTeks) waktuTeks = dapatkanWaktuSekarangString();
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pemasukan', waktu: rawWaktuInput, waktuTeksTampil });
+                financeLogs.push({ name, amount, type: 'Pemasukan', waktuTeks });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('incomeForm').reset();
             }
         });
 
+        // Input Pengeluaran Normal
         document.getElementById('expenseForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('expName').value;
             const amount = cleanRupiahValue(document.getElementById('expAmount').value);
-            const dateInput = document.getElementById('expDate').value;
-            
-            let waktuTeksTampil = dapatkanWaktuSekarang();
-            let rawWaktuInput = dateInput;
-            
-            if (dateInput.length === 16) {
-                const parsedDate = parseFormatInputKeDate(dateInput);
-                if (parsedDate) {
-                    waktuTeksTampil = ubahDateKeFormatTeks(parsedDate);
-                }
-            } else {
-                const sekarang = new Date();
-                const day = String(sekarang.getDate()).padStart(2, '0');
-                const month = String(sekarang.getMonth() + 1).padStart(2, '0');
-                const year = sekarang.getFullYear();
-                const hour = String(sekarang.getHours()).padStart(2, '0');
-                const minute = String(sekarang.getMinutes()).padStart(2, '0');
-                rawWaktuInput = day + '/' + month + '/' + year + ' ' + hour + ':' + minute;
-            }
+            let waktuTeks = document.getElementById('expDateText').value;
+            if (!waktuTeks) waktuTeks = dapatkanWaktuSekarangString();
             
             if (amount > 0) {
-                financeLogs.push({ name, amount, type: 'Pengeluaran', waktu: rawWaktuInput, waktuTeksTampil });
+                financeLogs.push({ name, amount, type: 'Pengeluaran', waktuTeks });
                 localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                 refreshDashboard();
                 document.getElementById('expenseForm').reset();
             }
         });
 
+        // LOGIKA MEMBUKA POP-UP EDIT KECIL
         function openEditModal(index) {
             const log = financeLogs[index];
             activeEditIndex = index;
@@ -425,7 +435,7 @@
             document.getElementById('modalTitle').innerText = log.type === 'Pemasukan' ? '✏️ Edit Log Pemasukan' : '✏️ Edit Log Pengeluaran';
             document.getElementById('popName').value = log.name;
             document.getElementById('popAmount').value = log.amount.toLocaleString('id-ID');
-            document.getElementById('popDate').value = log.waktu || '';
+            document.getElementById('popDateText').value = log.waktuTeks || log.waktu || dapatkanWaktuSekarangString();
             
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -435,26 +445,17 @@
             activeEditIndex = null;
         }
 
+        // SIMPAN DATA DARI POP-UP EDIT KE DATABASE BROWSER
         document.getElementById('popupEditForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if (activeEditIndex !== null) {
                 const name = document.getElementById('popName').value;
                 const amount = cleanRupiahValue(document.getElementById('popAmount').value);
-                const dateInput = document.getElementById('popDate').value;
+                const waktuTeks = document.getElementById('popDateText').value;
                 const originalType = financeLogs[activeEditIndex].type;
 
-                let waktuTeksTampil = dapatkanWaktuSekarang();
-                let rawWaktuInput = dateInput;
-
-                if (dateInput.length === 16) {
-                    const parsedDate = parseFormatInputKeDate(dateInput);
-                    if (parsedDate) {
-                        waktuTeksTampil = ubahDateKeFormatTeks(parsedDate);
-                    }
-                }
-
                 if (amount > 0) {
-                    financeLogs[activeEditIndex] = { name, amount, type: originalType, waktu: rawWaktuInput, waktuTeksTampil };
+                    financeLogs[activeEditIndex] = { name, amount, type: originalType, waktuTeks };
                     localStorage.setItem('itInfraWalletLogs', JSON.stringify(financeLogs));
                     
                     refreshDashboard();
@@ -463,6 +464,7 @@
             }
         });
 
+        // LOGIKA POP-UP KONFIRMASI HAPUS KUSTOM
         function deleteLog(index) {
             deleteTargetIndex = index;
             document.getElementById('deleteModal').style.display = 'flex';
@@ -482,6 +484,7 @@
             }
         }
 
+        // Jalankan render awal saat sistem pertama dimuat
         refreshDashboard();
     </script>
 </body>
